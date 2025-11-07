@@ -1,0 +1,183 @@
+======================================================================
+AI Search Demo - Natural Language + Semantic Search + Summaries
+======================================================================
+
+Loading embeddings...
+✓ Loaded 92 book embeddings
+
+======================================================================
+Query: "show me 3 books with female protagonists"
+======================================================================
+
+Step 1: Parsing natural language query...
+  Intent: search
+  Limit: 3
+  Attributes: ['female_protagonist', 'male_protagonist']
+  Search terms: ['male', 'protagonist', 'female', 'women']
+  Semantic query: "books with female protagonists"
+
+Step 2: Generating query embedding...
+Loading embedding model (sentence-transformers/all-MiniLM-L6-v2)...
+✓ Embedding model loaded
+  ✓ Generated 384-dimensional vector
+
+Step 3: Computing semantic similarity with all books...
+  ✓ Ranked 92 books
+
+Step 4: Returning top 3 results
+
+======================================================================
+SEARCH RESULTS
+======================================================================
+
+1. Little Women
+   Semantic: 0.486 | Metadata: 0.250 | Hybrid: 0.415
+
+2. Little Women; Or, Meg, Jo, Beth, and Amy
+   Semantic: 0.454 | Metadata: 0.250 | Hybrid: 0.393
+
+3. Cranford
+   Semantic: 0.405 | Metadata: 0.000 | Hybrid: 0.284
+
+======================================================================
+
+======================================================================
+KEY INSIGHTS
+======================================================================
+
+Average semantic similarity: 0.449
+Average metadata match: 0.167
+
+✓ Strong semantic matches - query meaning well understood
+✓ Found books matching 16% of search terms
+
+======================================================================
+Query: "find me 5 books about social injustice"
+======================================================================
+
+Step 1: Parsing natural language query...
+  Intent: search
+  Limit: 5
+  Attributes: ['theme_social_injustice']
+  Search terms: ['slavery', 'social', 'injustice']
+  Semantic query: "books about social injustice"
+
+Step 2: Generating query embedding...
+  ✓ Generated 384-dimensional vector
+
+Step 3: Computing semantic similarity with all books...
+  ✓ Ranked 92 books
+
+Step 4: Returning top 5 results
+
+======================================================================
+SEARCH RESULTS
+======================================================================
+
+1. Leviathan
+   Semantic: 0.386 | Metadata: 0.000 | Hybrid: 0.270
+
+2. Narrative of the Life of Frederick Douglass, an American Slave
+   Semantic: 0.376 | Metadata: 0.000 | Hybrid: 0.263
+
+3. The Souls of Black Folk
+   Semantic: 0.368 | Metadata: 0.000 | Hybrid: 0.258
+
+4. Crime and Punishment
+   Semantic: 0.360 | Metadata: 0.000 | Hybrid: 0.252
+
+5. Second Treatise of Government
+   Semantic: 0.357 | Metadata: 0.000 | Hybrid: 0.250
+
+======================================================================
+
+======================================================================
+KEY INSIGHTS
+======================================================================
+
+Average semantic similarity: 0.369
+Average metadata match: 0.000
+
+✓ Moderate semantic matches - related content found
+ℹ No direct metadata matches - purely semantic results
+
+======================================================================
+Query: "get me adventure stories"
+======================================================================
+
+Step 1: Parsing natural language query...
+  Intent: search
+  Limit: None
+  Attributes: ['genre_adventure']
+  Search terms: ['adventure']
+  Semantic query: "adventure stories"
+
+Step 2: Generating query embedding...
+  ✓ Generated 384-dimensional vector
+
+Step 3: Computing semantic similarity with all books...
+  ✓ Ranked 92 books
+
+Step 4: Returning top 10 results
+
+======================================================================
+SEARCH RESULTS
+======================================================================
+
+1. Alice's Adventures in Wonderland
+   Semantic: 0.423 | Metadata: 1.000 | Hybrid: 0.596
+
+2. The Adventures of Tom Sawyer, Complete
+   Semantic: 0.395 | Metadata: 1.000 | Hybrid: 0.577
+
+3. The Adventures of Roderick Random
+   Semantic: 0.374 | Metadata: 1.000 | Hybrid: 0.562
+
+4. Adventures of Huckleberry Finn
+   Semantic: 0.369 | Metadata: 1.000 | Hybrid: 0.559
+
+5. The Adventures of Sherlock Holmes
+   Semantic: 0.320 | Metadata: 1.000 | Hybrid: 0.524
+
+6. The Adventures of Ferdinand Count Fathom — Complete
+   Semantic: 0.305 | Metadata: 1.000 | Hybrid: 0.513
+
+7. Grimms' Fairy Tales
+   Semantic: 0.479 | Metadata: 0.000 | Hybrid: 0.335
+
+8. The Enchanted April
+   Semantic: 0.354 | Metadata: 0.000 | Hybrid: 0.248
+
+9. The Legend of Sleepy Hollow
+   Semantic: 0.330 | Metadata: 0.000 | Hybrid: 0.231
+
+10. Frankenstein; Or, The Modern Prometheus
+   Semantic: 0.328 | Metadata: 0.000 | Hybrid: 0.230
+
+======================================================================
+
+======================================================================
+KEY INSIGHTS
+======================================================================
+
+Average semantic similarity: 0.368
+Average metadata match: 0.600
+
+✓ Moderate semantic matches - related content found
+✓ Found books matching 60% of search terms
+
+======================================================================
+DEMO COMPLETE
+======================================================================
+
+This demo showed:
+  1. Natural language query parsing
+  2. Semantic search using embeddings
+  3. Hybrid scoring (semantic + metadata)
+  4. Ranked results by relevance
+
+Next steps:
+  - Add to invenio-aisearch as REST API endpoint
+  - Create web UI for search interface
+  - Enable full-text summaries from book content
+

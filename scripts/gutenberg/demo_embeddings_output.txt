@@ -1,0 +1,118 @@
+======================================================================
+Understanding Embeddings: How Semantic Search Works
+======================================================================
+
+Loading embeddings...
+✓ Loaded 92 book embeddings
+
+WHAT ARE EMBEDDINGS?
+----------------------------------------------------------------------
+An embedding is a list of 384 numbers that represents the 'meaning'
+of a text in mathematical space.
+
+Example for 'Don Quixote':
+  First 5 numbers: [0.04445763677358627, 0.04999871551990509, -0.022923748940229416, -0.049006469547748566, -0.06087655574083328]
+  Total numbers: 384
+
+Books with similar themes/content will have similar numbers!
+This lets us find books by MEANING, not just keywords.
+
+======================================================================
+DEMO 1: Find Books Similar to 'Pride and Prejudice'
+======================================================================
+
+Found: Pride and Prejudice
+Now calculating similarity with all other books...
+
+Top 10 Most Similar Books:
+
+   1. Sense and Sensibility                                   (similarity: 0.571)
+   2. The Romance of Lust: A classic Victorian erotic novel   (similarity: 0.490)
+   3. A Room with a View                                      (similarity: 0.447)
+   4. The Complete Works of William Shakespeare               (similarity: 0.441)
+   5. Cranford                                                (similarity: 0.438)
+   6. Jane Eyre: An Autobiography                             (similarity: 0.435)
+   7. The Enchanted April                                     (similarity: 0.431)
+   8. Wuthering Heights                                       (similarity: 0.424)
+   9. Romeo and Juliet                                        (similarity: 0.407)
+  10. Romeo and Juliet                                        (similarity: 0.407)
+
+Notice: These are books with similar themes (romance, social
+commentary, relationships) even though 'Pride and Prejudice'
+doesn't appear in their titles!
+
+======================================================================
+DEMO 2: Semantic Search - 'books about social injustice'
+======================================================================
+
+Query: 'books about social injustice and inequality'
+
+Step 1: Convert query to embedding...
+Loading embedding model (sentence-transformers/all-MiniLM-L6-v2)...
+✓ Embedding model loaded
+  ✓ Generated 384-dimensional vector
+
+Step 2: Compare with all books...
+  ✓ Calculated similarity scores
+
+Top 10 Results:
+
+   1. Leviathan                                               (score: 0.384)
+   2. The Souls of Black Folk                                 (score: 0.354)
+   3. Narrative of the Life of Frederick Douglass, an America (score: 0.347)
+   4. Second Treatise of Government                           (score: 0.347)
+   5. War and Peace                                           (score: 0.339)
+   6. The Republic                                            (score: 0.336)
+   7. How the Other Half Lives: Studies Among the Tenements o (score: 0.317)
+   8. Les Misérables                                          (score: 0.316)
+   9. Crime and Punishment                                    (score: 0.310)
+  10. Oliver Twist                                            (score: 0.308)
+
+Notice: Found books about slavery, inequality, and social issues
+without needing those exact words in the search!
+
+======================================================================
+DEMO 3: Why Traditional Keyword Search Falls Short
+======================================================================
+
+Query: 'stories of personal transformation'
+
+KEYWORD SEARCH (looks for exact words):
+  - Looking for 'transformation' in titles/metadata...
+  Found 0 matches (word 'transformation' not in titles)
+
+SEMANTIC SEARCH (understands meaning):
+  Top 5 matches by meaning:
+    1. Metamorphosis                                      (0.383)
+    2. Rip Van Winkle                                     (0.369)
+    3. The Yellow Wallpaper                               (0.353)
+    4. Narrative of the Life of Frederick Douglass, an Am (0.327)
+    5. Middlemarch                                        (0.309)
+
+  These books contain transformation themes even without
+  that specific word!
+
+======================================================================
+KEY TAKEAWAYS
+======================================================================
+
+1. EMBEDDINGS = Mathematical representation of meaning
+   - 384 numbers capture themes, concepts, relationships
+
+2. SIMILARITY = Closeness in meaning
+   - Calculated using cosine similarity (dot product)
+   - Score > 0.7: very similar
+   - Score > 0.5: related
+   - Score < 0.3: different topics
+
+3. SEMANTIC SEARCH > KEYWORD SEARCH
+   - Finds 'The Souls of Black Folk' for 'social injustice'
+   - Finds 'Great Expectations' for 'personal transformation'
+   - Understands synonyms and related concepts
+
+4. FOR YOUR DEMO:
+   - Query: 'books with female protagonists'
+   - Semantic search finds books with strong female characters
+   - Even if 'female' or 'protagonist' aren't in the description!
+
+======================================================================
