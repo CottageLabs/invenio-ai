@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "v13-ai-db",
+      "Group": "Servers",
+      "Host": "v13-ai-db-1",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "v13-ai",
+      "SSLMode": "prefer"
+    }
+  }
+}
