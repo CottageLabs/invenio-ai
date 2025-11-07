@@ -1,6 +1,13 @@
 # Don't upload Gutenberg data
 gutenberg_data/
 
+# Generated embeddings (can be recreated)
+embeddings.json
+
+# API tokens and credentials (SECURITY SENSITIVE)
+scripts/gutenberg/.api_token
+.api_token
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
