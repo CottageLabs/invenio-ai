@@ -21,14 +21,14 @@ with app.app_context():
     print("Blueprint Check")
     print("=" * 60)
 
-    # Check if blueprint is registered
-    if 'invenio_aisearch_api' in app.blueprints:
-        print("✓ Blueprint 'invenio_aisearch_api' is registered")
-        bp = app.blueprints['invenio_aisearch_api']
+    # Check if blueprint is registered (refactored name: ai_search_api)
+    if 'ai_search_api' in app.blueprints:
+        print("✓ Blueprint 'ai_search_api' is registered")
+        bp = app.blueprints['ai_search_api']
         print(f"  Blueprint object: {bp}")
         print(f"  URL prefix: {bp.url_prefix}")
     else:
-        print("✗ Blueprint 'invenio_aisearch_api' is NOT registered")
+        print("✗ Blueprint 'ai_search_api' is NOT registered")
 
     print("\n" + "=" * 60)
     print("URL Rules")
@@ -57,8 +57,8 @@ with app.app_context():
     else:
         print("✗ App entry point not found")
 
-    # Check API blueprint entry point
-    api_eps = list(pkg_resources.iter_entry_points('invenio_base.api_blueprints', 'invenio_aisearch_api'))
+    # Check API blueprint entry point (refactored name: ai_search_api)
+    api_eps = list(pkg_resources.iter_entry_points('invenio_base.api_blueprints', 'ai_search_api'))
     if api_eps:
         print("✓ Found API blueprint entry point:")
         print(f"  {api_eps[0]}")

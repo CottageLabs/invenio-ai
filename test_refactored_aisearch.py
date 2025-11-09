@@ -85,10 +85,15 @@ print("\n[6/6] Testing URL rules...")
 try:
     url_rules = resource.create_url_rules()
     print(f"   ✓ Created {len(url_rules)} URL rules:")
-    for rule in url_rules:
-        print(f"      - {rule.rule} [{', '.join(rule.methods)}]")
+    for rule_dict in url_rules:
+        # flask-resources returns dicts with 'rule' and 'methods' keys
+        rule = rule_dict.get('rule', 'unknown')
+        methods = rule_dict.get('methods', [])
+        print(f"      - {rule} [{', '.join(methods) if methods else 'GET'}]")
 except Exception as e:
     print(f"   ✗ URL rules creation failed: {e}")
+    import traceback
+    traceback.print_exc()
     sys.exit(1)
 
 # Test 7: Result objects
