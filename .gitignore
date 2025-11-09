@@ -83,3 +83,4 @@ data/.minio.sys
 
 # Celery
 celerybeat-schedule
+invenio-aisearch/

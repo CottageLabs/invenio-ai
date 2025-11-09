@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../invenio-aisearch/.idea/invenio-aisearch.iml" filepath="$PROJECT_DIR$/../invenio-aisearch/.idea/invenio-aisearch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../invenio-notify/.idea/invenio-notify.iml" filepath="$PROJECT_DIR$/../invenio-notify/.idea/invenio-notify.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/v13-ai.iml" filepath="$PROJECT_DIR$/.idea/v13-ai.iml" />
     </modules>
   </component>

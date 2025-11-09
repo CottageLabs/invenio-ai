@@ -4,6 +4,8 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="jdk" jdkName="Python 3.12 (v13-ai-MDFEVX9l)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="invenio-aisearch" />
+    <orderEntry type="module" module-name="invenio-notify" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />
