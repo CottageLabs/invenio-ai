@@ -4,6 +4,5 @@
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../invenio-aisearch" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../invenio-notify" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/invenio-aisearch" vcs="Git" />
   </component>
 </project>

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9a0d8c65885a4a240f7752538c079bdf5e8fc3f2ae3c54059e0eef0ad2c23c75"
+            "sha256": "d74a30b48caf4f7d16b5f205c9926f2de8a1c97b25735612d144be9fbdd24c61"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -1073,8 +1073,8 @@
             "version": "==4.3.1"
         },
         "invenio-aisearch": {
-            "git": "https://github.com/CottageLabs/invenio-aisearch.git@cd68289d764095f28f595cee5fd40f617d094f7b",
-            "ref": "cd68289d764095f28f595cee5fd40f617d094f7b"
+            "editable": true,
+            "file": "../invenio-aisearch"
         },
         "invenio-app": {
             "hashes": [
