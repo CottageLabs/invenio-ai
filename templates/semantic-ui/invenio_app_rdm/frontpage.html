@@ -1,0 +1,77 @@
+{#
+  Copyright (C) 2019-2020 CERN.
+  Copyright (C) 2019-2020 Northwestern University.
+  Copyright (C) 2021 New York University.
+
+  Invenio App RDM is free software; you can redistribute it and/or modify it
+  under the terms of the MIT License; see LICENSE file for more details.
+#}
+{% from "invenio_app_rdm/macros/records_list.html" import records_list %}
+{% from "invenio_communities/macros/communities_carousel.html" import communities_carousel %}
+
+{%- extends "invenio_theme/frontpage.html" %}
+
+{%- block page_header %}
+  {%- include "invenio_app_rdm/header_frontpage.html" %}
+{%- endblock page_header %}
+
+{%- block page_body %}
+
+  {%- block intro_section %}
+    {% if show_intro_section %}
+      {% include "invenio_app_rdm/intro_section.html" %}
+    {% endif %}
+  {%- endblock intro_section %}
+
+  {%- block top_banner %}
+    {{ communities_carousel() }}
+  {%- endblock top_banner %}
+
+  {%- block ai_search_section %}
+    {# AI Search Section #}
+    <div class="ui container rel-mt-2">
+      <div class="ui segment">
+        <div class="ui grid">
+          <div class="row">
+            <div class="ten wide column">
+              <h2 class="ui header">
+                <i class="magic icon"></i>
+                <div class="content">
+                  {{ _('AI-Powered Search') }}
+                  <div class="sub header">{{ _('Discover records using natural language and semantic similarity') }}</div>
+                </div>
+              </h2>
+              <p>{{ _('Search the repository using AI-powered semantic search. Ask questions in plain language and find relevant records based on meaning, not just keywords.') }}</p>
+            </div>
+            <div class="six wide column" style="display: flex; align-items: center; justify-content: center;">
+              <a href="/aisearch" class="ui large primary button">
+                <i class="search icon"></i>
+                {{ _('Try AI Search') }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {%- endblock ai_search_section %}
+
+  {%- block grid_section %}
+    <div class="ui container rel-mt-2">
+
+      {% block main_column %}
+        <div>
+
+          {% block main_column_content %}
+            {{ records_list() }}
+          {% endblock main_column_content %}
+
+        </div>
+      {% endblock main_column %}
+
+    </div>
+  {%- endblock grid_section %}
+
+  {%- block bottom_section %}
+  {%- endblock bottom_section %}
+
+{%- endblock page_body %}
