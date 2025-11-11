@@ -61,13 +61,23 @@ Each chunk document contains:
 
 #### Configuration (`invenio_aisearch/config.py`)
 
-Added configuration options:
+Added configuration options with generic defaults:
 ```python
 INVENIO_AISEARCH_CHUNKS_INDEX = "document-chunks-v1"
 INVENIO_AISEARCH_CHUNK_SIZE = 600
 INVENIO_AISEARCH_CHUNK_OVERLAP = 150
 INVENIO_AISEARCH_CHUNKS_ENABLED = False
+INVENIO_AISEARCH_DATA_DIR = "aisearch_data"
+INVENIO_AISEARCH_CHUNKS_FILE = "document_chunks.jsonl"
 ```
+
+Instance overrides in `v13-ai/invenio.cfg`:
+```python
+INVENIO_AISEARCH_DATA_DIR = "gutenberg_data"
+INVENIO_AISEARCH_CHUNKS_FILE = "book_chunks.jsonl"
+```
+
+This allows the extension to be generic while instances can customize for their specific use cases.
 
 #### OpenSearch Index Structure
 
@@ -221,26 +231,30 @@ These additions enable:
 ### Complete Setup Workflow
 
 ```bash
-# 1. Chunk documents from InvenioRDM records
-invenio aisearch chunk-documents --output book_chunks.jsonl
+# 1. Chunk documents from InvenioRDM records (uses config defaults)
+invenio aisearch chunk-documents
 
 # 2. Create OpenSearch index
 invenio aisearch create-chunks-index
 
-# 3. Generate and index embeddings
-invenio aisearch generate-chunk-embeddings book_chunks.jsonl --batch-size 100
+# 3. Generate and index embeddings (uses config defaults)
+invenio aisearch generate-chunk-embeddings
 
 # 4. Verify
 invenio aisearch chunks-status
 ```
 
-**Note**: All chunking functionality is now integrated into the `invenio-aisearch` extension. Chunking parameters (size, overlap) are read from configuration (`INVENIO_AISEARCH_CHUNK_SIZE`, `INVENIO_AISEARCH_CHUNK_OVERLAP`).
+**Note**: All commands use configuration defaults from `invenio.cfg`:
+- Chunking parameters: `INVENIO_AISEARCH_CHUNK_SIZE`, `INVENIO_AISEARCH_CHUNK_OVERLAP`
+- Data location: `INVENIO_AISEARCH_DATA_DIR`, `INVENIO_AISEARCH_CHUNKS_FILE`
+- The extension has generic defaults (`aisearch_data/document_chunks.jsonl`)
+- Instance config overrides for Project Gutenberg (`gutenberg_data/book_chunks.jsonl`)
 
 ### Async Processing (for Production)
 
 ```bash
-# Queue as Celery task
-invenio aisearch generate-chunk-embeddings book_chunks.jsonl --async
+# Queue as Celery task (uses config defaults)
+invenio aisearch generate-chunk-embeddings --async
 
 # Monitor Celery logs
 # Check progress
@@ -254,8 +268,8 @@ invenio aisearch chunks-status
 invenio aisearch create-chunks-index
 # (Confirm 'yes' when prompted)
 
-# Reprocess embeddings
-invenio aisearch generate-chunk-embeddings book_chunks.jsonl
+# Reprocess embeddings (uses config defaults)
+invenio aisearch generate-chunk-embeddings
 ```
 
 ## Integration Points
