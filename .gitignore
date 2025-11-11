@@ -2,7 +2,7 @@
 gutenberg_data/
 
 # Generated embeddings (can be recreated)
-embeddings.json
+book_chunks.jsonl
 
 # API tokens and credentials (SECURITY SENSITIVE)
 scripts/gutenberg/.api_token
