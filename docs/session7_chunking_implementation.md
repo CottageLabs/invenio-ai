@@ -286,11 +286,14 @@ invenio aisearch generate-chunk-embeddings
 - `scripts/chunk_books.py` - New chunking script
 - `book_chunks.jsonl` - Generated chunk data (28,877 lines, ~100 MB)
 
-### API/Service Integration (Not Yet Implemented)
+### API/Service Integration
 
-The following are ready for implementation:
-- Passage search service (query chunks by semantic similarity)
-- REST API endpoint (`/api/aisearch/passages?q=...`)
+**Implemented:**
+- ✅ Passage search service (`search_passages` method in `AISearchService`)
+- ✅ REST API endpoint (`/api/aisearch/passages?q=...&limit=10`)
+- ✅ Tested with multiple semantic query types
+
+**Pending:**
 - UI components for displaying passage results
 - Integration with existing `/aisearch` search interface
 
@@ -303,13 +306,14 @@ The following are ready for implementation:
 4. CLI management commands
 5. Full integration with invenio-aisearch
 6. All 28,877 chunks indexed with embeddings
+7. Passage search service implementation
+8. REST API endpoint for passage search
+9. Tested with multiple semantic query types
 
 ### 🔄 Ready for Next Session
-1. Create passage search service
-2. Add API endpoint for passage search
-3. Build UI to display passage results with book context
-4. Test with demo queries for presentation
-5. Enable `INVENIO_AISEARCH_CHUNKS_ENABLED` config
+1. Build UI to display passage results with book context
+2. Integrate with existing `/aisearch` search interface
+3. Enable `INVENIO_AISEARCH_CHUNKS_ENABLED` config
 
 ## Demo Query Ideas
 
@@ -332,6 +336,44 @@ These queries will showcase capabilities impossible with traditional search:
 
 Each query will return specific passages from multiple books, showing the exact text that semantically matches, with metadata about which book and where in the book.
 
+## API Testing Results
+
+The `/api/aisearch/passages` endpoint has been successfully tested with various semantic query types:
+
+### Query 1: Character Decisions
+**Query**: `protagonist makes an important decision`
+**Top Results**:
+- **Tom Jones** by Henry Fielding (similarity: 0.665) - Blifil deciding to pursue marriage with Sophia for her fortune
+- **Ferdinand Count Fathom** by Tobias Smollett (similarity: 0.647) - Ferdinand contemplating becoming a highwayman
+
+### Query 2: Quest Beginnings
+**Query**: `main character embarks on their quest`
+**Top Results**:
+- **Ferdinand Count Fathom** by Smollett (similarity: 0.618) - Resolving to face banditti in the woods
+- **Treasure Island** by Robert Louis Stevenson (similarity: 0.615) - Jim Hawkins excited about the adventure
+- **My Life** by Richard Wagner (similarity: 0.613) - Philosophical reflection on life choices
+
+### Query 3: Thematic Search - Sacrifice
+**Query**: `moments of sacrifice and selflessness`
+**Top Results**:
+- **War and Peace** by Leo Tolstoy (similarity: 0.682)
+- **How to Observe: Morals and Manners** by Harriet Martineau (similarity: 0.680)
+- **Les Misérables** by Victor Hugo (similarity: 0.678)
+
+### Query 4: Philosophical Concepts
+**Query**: `philosophical reflections on death and mortality`
+**Top Results**:
+- **Thus Spake Zarathustra** by Friedrich Nietzsche (similarity: 0.726)
+- **Meditations** by Marcus Aurelius (similarity: 0.715)
+- **Les Misérables** by Victor Hugo (similarity: 0.687)
+
+**Key Observations**:
+- Similarity scores range from 0.60-0.75 for relevant matches
+- The system correctly identifies thematic content across diverse literary works
+- Philosophical queries return the most relevant philosophical texts
+- Character-driven queries find narrative passages about decisions and actions
+- The semantic search successfully captures concepts that would be impossible to find with keyword search
+
 ## Files Created/Modified Summary
 
 ### New Files
@@ -347,6 +389,9 @@ Each query will return specific passages from multiple books, showing the exact 
   - `chunk-documents` - Chunk documents from InvenioRDM records
 - `../invenio-aisearch/invenio_aisearch/tasks.py` - Added Celery task for async processing
 - `../invenio-aisearch/invenio_aisearch/models.py` - Enhanced ModelManager with batch encoding
+- `../invenio-aisearch/invenio_aisearch/services/service/ai_search_service.py` - Added `search_passages` method
+- `../invenio-aisearch/invenio_aisearch/resources/resource/ai_search_resource.py` - Added `passages` endpoint handler
+- `../invenio-aisearch/invenio_aisearch/resources/config.py` - Added passages route
 
 ### Removed Files (Consolidated into CLI)
 - `scripts/chunk_books.py` - Replaced by `invenio aisearch chunk-documents`
@@ -368,34 +413,36 @@ Each query will return specific passages from multiple books, showing the exact 
 
 ## Next Steps for Presentation
 
-For the demo next week, we need:
+For the demo next week:
 
-1. **Search Service** (~2 hours)
-   - Create `ChunkSearchService` in invenio-aisearch
-   - Implement KNN query on document-chunks-v1
-   - Return passages with book context
+**✅ Completed**:
+1. ~~Search Service~~ - `search_passages` method implemented in `AISearchService`
+2. ~~API Endpoint~~ - `/api/aisearch/passages` endpoint working and tested
+3. ~~Testing~~ - Multiple semantic query types tested successfully
 
-2. **API Endpoint** (~1 hour)
-   - Add `/api/aisearch/passages` endpoint
-   - Format response with passage text, book info, similarity scores
-
-3. **UI Component** (~2-3 hours)
+**Remaining Work** (~2-3 hours):
+1. **UI Component** (~2-3 hours)
    - Create passage results page/component
-   - Show matching text with highlighting
+   - Show matching text with context
    - Link back to full book record
-   - Display chunk position and context
+   - Display chunk position and similarity scores
+   - Add simple search interface
 
-4. **Testing & Polish** (~1 hour)
-   - Test with demo queries
-   - Refine result ranking/display
-   - Prepare presentation talking points
-
-**Total estimated time**: 6-7 hours to make demo-ready
+**Total estimated time remaining**: 2-3 hours to make demo-ready
 
 ## Conclusion
 
-We have successfully built a complete document-level full-text semantic search infrastructure. All chunks are indexed with embeddings and ready for semantic queries. The system is properly integrated with InvenioRDM patterns using CLI commands, Celery tasks, and configuration options.
+We have successfully built a complete document-level full-text semantic search infrastructure with a working API. All chunks are indexed with embeddings and can be queried through the REST API. The system is properly integrated with InvenioRDM patterns using CLI commands, Celery tasks, and configuration options.
 
-The hard infrastructure work is complete. The remaining work (search service, API, UI) is straightforward implementation that builds on established patterns in the existing codebase.
+**What's Working**:
+- ✅ 28,877 document chunks indexed with 384-dimensional embeddings
+- ✅ OpenSearch k-NN search with nmslib engine
+- ✅ Service layer (`search_passages` method)
+- ✅ REST API endpoint (`/api/aisearch/passages`)
+- ✅ Successfully tested with multiple semantic query types
+- ✅ Similarity scores ranging from 0.60-0.75 for relevant matches
 
-**Status**: Production-ready infrastructure, demo-ready features pending (~7 hours of work).
+**Remaining Work**:
+- UI components for displaying passage results (~2-3 hours)
+
+**Status**: Production-ready API, demo-ready UI pending (~3 hours of work).
