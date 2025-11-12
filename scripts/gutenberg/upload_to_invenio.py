@@ -4,6 +4,7 @@ Upload Project Gutenberg books to InvenioRDM.
 Reads metadata and text files from the Gutenberg download and creates InvenioRDM records.
 """
 
+import csv
 import json
 import os
 import requests
@@ -11,6 +12,11 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional
 import urllib3
+
+try:
+    import pycountry
+except ImportError:
+    pycountry = None
 
 # Disable SSL warnings for self-signed certificates
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -42,6 +48,50 @@ class InvenioUploader:
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
         }
+
+        # Load publication years and Wikipedia URLs mapping
+        self.publication_years, self.wikipedia_urls = self._load_publication_data()
+
+    def _load_publication_data(self) -> tuple:
+        """
+        Load publication years and Wikipedia URLs from CSV file.
+
+        Returns:
+            Tuple of (publication_years dict, wikipedia_urls dict)
+        """
+        pub_years_file = self.data_dir / "gutenberg_publication_years.csv"
+
+        if not pub_years_file.exists():
+            print(f"Warning: Publication years file not found at {pub_years_file}")
+            print("  Using fallback dates for all books.")
+            return {}, {}
+
+        pub_years = {}
+        wiki_urls = {}
+        try:
+            with open(pub_years_file, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    try:
+                        gutenberg_id = int(row['gutenberg_id'])
+                        pub_year = int(row['publication_year'])
+                        pub_years[gutenberg_id] = pub_year
+
+                        # Store Wikipedia URL if present
+                        wiki_url = row.get('wikipedia_url', '').strip()
+                        if wiki_url:
+                            wiki_urls[gutenberg_id] = wiki_url
+                    except (ValueError, KeyError):
+                        # Skip rows with invalid data
+                        continue
+
+            print(f"Loaded {len(pub_years)} publication years and {len(wiki_urls)} Wikipedia URLs from {pub_years_file.name}")
+            return pub_years, wiki_urls
+
+        except Exception as e:
+            print(f"Warning: Failed to load publication data: {e}")
+            print("  Using fallback dates for all books.")
+            return {}, {}
 
     def create_metadata(self, book_meta: Dict) -> Dict:
         """
@@ -106,8 +156,14 @@ class InvenioUploader:
         if book_meta.get('summaries'):
             description = book_meta['summaries'][0]
 
-        # Determine publication date (use current year as fallback)
-        pub_date = "1900-01-01"  # Default for old public domain books
+        # Determine publication date from dataset or use fallback
+        book_id = book_meta.get('id')
+        if book_id and book_id in self.publication_years:
+            pub_year = self.publication_years[book_id]
+            pub_date = str(pub_year)  # InvenioRDM accepts just year
+        else:
+            # Fallback for books without known publication date
+            pub_date = "1900"
 
         # Create InvenioRDM metadata
         metadata = {
@@ -117,12 +173,107 @@ class InvenioUploader:
             "publication_date": pub_date,
         }
 
+        # Add languages (convert ISO 639-1 to ISO 639-3)
+        languages_list = book_meta.get('languages', [])
+        if languages_list:
+            converted_langs = []
+            for lang_code in languages_list:
+                # Convert ISO 639-1 (2-letter) to ISO 639-3 (3-letter)
+                if pycountry and len(lang_code) == 2:
+                    try:
+                        lang = pycountry.languages.get(alpha_2=lang_code)
+                        if lang:
+                            converted_langs.append({"id": lang.alpha_3})
+                        else:
+                            # Fallback if not found
+                            converted_langs.append({"id": lang_code})
+                    except (AttributeError, KeyError):
+                        converted_langs.append({"id": lang_code})
+                else:
+                    # Already 3-letter or pycountry not available
+                    converted_langs.append({"id": lang_code})
+
+            if converted_langs:
+                metadata["languages"] = converted_langs
+
         # Add optional fields
         if description:
             metadata["description"] = description
 
         if subjects:
             metadata["subjects"] = subjects
+
+        # Add alternate identifiers
+        identifiers = []
+        if book_id:
+            identifiers.append({
+                "identifier": str(book_id),
+                "scheme": "other"  # Project Gutenberg ID
+            })
+        if identifiers:
+            metadata["identifiers"] = identifiers
+
+        # Add contributors (editors and translators)
+        contributors = []
+        for editor in book_meta.get('editors', []):
+            editor_name = editor.get('name', 'Unknown Editor')
+            # Parse "Last, First" format
+            if ',' in editor_name:
+                parts = editor_name.split(',', 1)
+                family_name = parts[0].strip()
+                given_name = parts[1].strip() if len(parts) > 1 else ""
+            else:
+                # Use full name as family name if no comma
+                family_name = editor_name
+                given_name = ""
+
+            contributor = {
+                "person_or_org": {
+                    "type": "personal",
+                    "name": editor_name,
+                },
+                "role": {"id": "editor"}
+            }
+
+            if given_name:
+                contributor["person_or_org"]["given_name"] = given_name
+            if family_name:
+                contributor["person_or_org"]["family_name"] = family_name
+
+            contributors.append(contributor)
+
+        for translator in book_meta.get('translators', []):
+            translator_name = translator.get('name', 'Unknown Translator')
+            # Parse "Last, First" format
+            if ',' in translator_name:
+                parts = translator_name.split(',', 1)
+                family_name = parts[0].strip()
+                given_name = parts[1].strip() if len(parts) > 1 else ""
+            else:
+                # Use full name as family name if no comma
+                family_name = translator_name
+                given_name = ""
+
+            contributor = {
+                "person_or_org": {
+                    "type": "personal",
+                    "name": translator_name,
+                },
+                "role": {"id": "other"}  # No "translator" role in vocabulary
+            }
+
+            if given_name:
+                contributor["person_or_org"]["given_name"] = given_name
+            if family_name:
+                contributor["person_or_org"]["family_name"] = family_name
+
+            contributors.append(contributor)
+
+        if contributors:
+            metadata["contributors"] = contributors
+
+        # Add format
+        metadata["formats"] = ["text/plain"]
 
         # Add publisher
         metadata["publisher"] = "Project Gutenberg"
@@ -141,6 +292,16 @@ class InvenioUploader:
                          f"Downloaded from https://www.gutenberg.org/ebooks/{book_meta.get('id')}",
             "type": {"id": "other"}
         }]
+
+        # Add Wikipedia URL as a related identifier if available
+        if book_id and book_id in self.wikipedia_urls:
+            wiki_url = self.wikipedia_urls[book_id]
+            metadata["related_identifiers"] = [{
+                "identifier": wiki_url,
+                "scheme": "url",
+                "relation_type": {"id": "describes"},
+                "resource_type": {"id": "other"}
+            }]
 
         return metadata
 
@@ -368,13 +529,278 @@ class InvenioUploader:
 
         print(f"{'='*60}")
 
+    def get_existing_records(self, page_size: int = 100):
+        """
+        Fetch existing records from the repository.
+
+        Args:
+            page_size: Number of records per page
+
+        Yields:
+            Record dictionaries (only Project Gutenberg books)
+        """
+        page = 1
+        while True:
+            try:
+                url = f"{self.api_url}/records"
+                params = {
+                    "size": page_size,
+                    "page": page,
+                }
+
+                response = requests.get(
+                    url,
+                    params=params,
+                    headers={"Accept": "application/json"},
+                    verify=False
+                )
+                response.raise_for_status()
+
+                data = response.json()
+                hits = data.get('hits', {}).get('hits', [])
+
+                if not hits:
+                    break
+
+                for record in hits:
+                    # Only yield Project Gutenberg records
+                    publisher = record.get('metadata', {}).get('publisher', '')
+                    if publisher == 'Project Gutenberg':
+                        yield record
+
+                page += 1
+                time.sleep(0.5)  # Rate limiting
+
+            except Exception as e:
+                print(f"Error fetching records: {e}")
+                break
+
+    def extract_gutenberg_id(self, record: Dict) -> Optional[int]:
+        """
+        Extract Gutenberg ID from record metadata.
+
+        Args:
+            record: InvenioRDM record
+
+        Returns:
+            Gutenberg ID or None
+        """
+        # Check additional_descriptions for Gutenberg ID
+        metadata = record.get('metadata', {})
+        for desc in metadata.get('additional_descriptions', []):
+            desc_text = desc.get('description', '')
+            if 'Project Gutenberg eBook #' in desc_text:
+                try:
+                    # Extract ID from text like "Project Gutenberg eBook #84."
+                    id_str = desc_text.split('#')[1].split('.')[0]
+                    return int(id_str)
+                except (IndexError, ValueError):
+                    continue
+
+        return None
+
+    def create_new_version(self, record_id: str) -> Optional[Dict]:
+        """
+        Create a new version draft of an existing record.
+
+        Args:
+            record_id: Record ID
+
+        Returns:
+            New version draft or None if failed
+        """
+        try:
+            response = requests.post(
+                f"{self.api_url}/records/{record_id}/versions",
+                headers=self.headers,
+                verify=False
+            )
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"  Error creating new version: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"  Response: {e.response.text}")
+            return None
+
+    def import_files_from_previous_version(self, draft_id: str) -> bool:
+        """
+        Import files from the previous version.
+
+        Args:
+            draft_id: Draft ID
+
+        Returns:
+            True if successful
+        """
+        try:
+            response = requests.post(
+                f"{self.api_url}/records/{draft_id}/draft/actions/files-import",
+                headers=self.headers,
+                verify=False
+            )
+            response.raise_for_status()
+            return True
+        except Exception as e:
+            print(f"  Error importing files: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"  Response: {e.response.text}")
+            return False
+
+    def update_draft_metadata(self, draft_id: str, updated_metadata: Dict) -> bool:
+        """
+        Update a draft's metadata.
+
+        Args:
+            draft_id: Draft ID
+            updated_metadata: New metadata
+
+        Returns:
+            True if successful
+        """
+        try:
+            payload = {"metadata": updated_metadata}
+
+            response = requests.put(
+                f"{self.api_url}/records/{draft_id}/draft",
+                headers=self.headers,
+                json=payload,
+                verify=False
+            )
+            response.raise_for_status()
+            return True
+        except Exception as e:
+            print(f"  Error updating draft: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"  Response: {e.response.text}")
+            return False
+
+    def update_record(self, record: Dict) -> bool:
+        """
+        Update a single record with enhanced metadata.
+
+        Args:
+            record: Existing record
+
+        Returns:
+            True if successful
+        """
+        record_id = record.get('id')
+        metadata = record.get('metadata', {})
+        title = metadata.get('title', 'Unknown')
+
+        print(f"\nUpdating: {title}")
+        print(f"  Record ID: {record_id}")
+
+        # Extract Gutenberg ID
+        gutenberg_id = self.extract_gutenberg_id(record)
+        if not gutenberg_id:
+            print(f"  ✗ Could not extract Gutenberg ID, skipping")
+            return False
+
+        print(f"  Gutenberg ID: {gutenberg_id}")
+
+        # Load corresponding Gutenberg metadata file
+        metadata_dir = self.data_dir / "metadata"
+        metadata_files = list(metadata_dir.glob(f"{gutenberg_id}_*.json"))
+
+        if not metadata_files:
+            print(f"  ✗ Gutenberg metadata file not found")
+            return False
+
+        with open(metadata_files[0], 'r', encoding='utf-8') as f:
+            gutenberg_meta = json.load(f)
+
+        # Create enhanced metadata
+        enhanced_metadata = self.create_metadata(gutenberg_meta)
+
+        # Create new version
+        print(f"  Creating new version...")
+        new_draft = self.create_new_version(record_id)
+        if not new_draft:
+            print(f"  ✗ Failed to create new version")
+            return False
+
+        draft_id = new_draft.get('id')
+        print(f"  ✓ New version draft created: {draft_id}")
+
+        # Import files from previous version
+        print(f"  Importing files from previous version...")
+        if not self.import_files_from_previous_version(draft_id):
+            print(f"  ✗ Failed to import files")
+            return False
+
+        print(f"  ✓ Files imported")
+
+        # Update metadata
+        print(f"  Updating metadata...")
+        if not self.update_draft_metadata(draft_id, enhanced_metadata):
+            print(f"  ✗ Failed to update metadata")
+            return False
+
+        print(f"  ✓ Metadata updated")
+
+        # Publish
+        print(f"  Publishing...")
+        published = self.publish_draft(draft_id)
+        if not published:
+            print(f"  ✗ Failed to publish")
+            return False
+
+        print(f"  ✓ Published successfully")
+        return True
+
+    def update_all(self, limit: Optional[int] = None):
+        """
+        Update all Gutenberg records with enhanced metadata.
+
+        Args:
+            limit: Optional limit on number of records to update
+        """
+        print(f"{'='*60}")
+        print(f"Updating Project Gutenberg records with enhanced metadata")
+        print(f"API: {self.api_url}")
+        print(f"{'='*60}")
+
+        successful = 0
+        failed = []
+        count = 0
+
+        for record in self.get_existing_records():
+            count += 1
+            if limit and count > limit:
+                break
+
+            if self.update_record(record):
+                successful += 1
+            else:
+                record_id = record.get('id')
+                title = record.get('metadata', {}).get('title', 'Unknown')
+                failed.append((record_id, title))
+
+            # Rate limiting
+            time.sleep(1)
+
+        # Summary
+        print(f"\n{'='*60}")
+        print(f"Update Summary:")
+        print(f"  Successful: {successful}")
+        print(f"  Failed: {len(failed)}")
+
+        if failed:
+            print(f"\nFailed updates:")
+            for record_id, title in failed:
+                print(f"  - {record_id}: {title}")
+
+        print(f"{'='*60}")
+
 
 def main():
     """Main entry point."""
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='Upload Project Gutenberg books to InvenioRDM'
+        description='Upload or update Project Gutenberg books in InvenioRDM'
     )
     parser.add_argument(
         '-d', '--data-dir',
@@ -397,7 +823,12 @@ def main():
     parser.add_argument(
         '-n', '--limit',
         type=int,
-        help='Limit number of books to upload (default: all)'
+        help='Limit number of books to process (default: all)'
+    )
+    parser.add_argument(
+        '--update',
+        action='store_true',
+        help='Update existing records with enhanced metadata instead of uploading new books'
     )
 
     args = parser.parse_args()
@@ -408,7 +839,10 @@ def main():
         data_dir=args.data_dir
     )
 
-    uploader.upload_all(limit=args.limit)
+    if args.update:
+        uploader.update_all(limit=args.limit)
+    else:
+        uploader.upload_all(limit=args.limit)
 
 
 if __name__ == '__main__':

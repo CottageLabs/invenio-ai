@@ -1,0 +1,1905 @@
+
+ ▐▛███▜▌   Claude Code v2.0.37
+▝▜█████▛▘  Sonnet 4.5 · Claude Pro
+  ▘▘ ▝▝    /home/steve/code/cl/Invenio/v13-ai
+════════════════════════ Conversation compacted · ctrl+o for history ═══════════════════════
+  ⎿ Referenced file 
+    ../invenio-aisearch/invenio_aisearch/services/service/ai_search_service.py
+  ⎿  Referenced file ../../../../../../tmp/webpack_build.log
+  ⎿ Read 
+    ../invenio-aisearch/invenio_aisearch/assets/semantic-ui/js/invenio_aisearch/search.js
+    (392 lines)
+  ⎿  Read ../invenio-aisearch/invenio_aisearch/services/schemas.py (69 lines)
+  ⎿ Read ../invenio-aisearch/invenio_aisearch/templates/invenio_aisearch/search.html (119 
+    lines)
+
+● I'll complete the debug logging removal by removing the remaining statement at line
+  318-320.
+
+● Read(~/code/cl/Invenio/invenio-aisearch/invenio_aisearch/services/service/ai_search_servic
+      e.py)
+  ⎿  Read 20 lines
+
+● Update(~/code/cl/Invenio/invenio-aisearch/invenio_aisearch/services/service/ai_search_serv
+        ice.py)
+  ⎿  Updated ../invenio-aisearch/invenio_aisearch/services/service/ai_search_service.py
+     with 4 removals
+       315                passages.sort(key=lambda p: p['similarity_score'], 
+             reverse=True)
+       316                passage_total = len(passages)
+       317    
+       318 -              current_app.logger.debug(
+       319 -                  f"Filtered to {passage_total} passages from 
+           - {len(displayed_record_ids)} displayed books"
+       320 -              )
+       321 -  
+       318            # Generate summaries ONLY for final displayed results (if 
+             requested)
+       319            if include_summaries and getattr(self.config, 
+             'enable_summaries', True):
+       320                for result in results:
+
+● Done! I've removed all the debug logging statements for the passage boost feature from
+   ai_search_service.py:
+
+  Removed:
+  1. ✅ "Passage boost for {record_id}" debug statement
+  2. ✅ "Boosted {record_id}: {original_score} -> {boosted_score}" debug statement
+  3. ✅ "Filtered to {passage_total} passages from {len(displayed_record_ids)} displayed
+   books" debug statement
+
+  The debug logging cleanup is complete. The only remaining debug statement is the
+  deduplication one at line 131, which is less noisy and only logs when duplicates are
+  actually found.
+
+> please can you summarise our conversation into a session document inside docs/ 
+
+● I'll create a session document summarizing our work. Let me first check the docs
+  directory structure to follow any existing conventions.
+
+● Bash(ls -la docs/)
+  ⎿  total 228                                      
+     drwxr-xr-x  2 steve steve  4096 Nov 11 14:53 .
+     drwxr-xr-x 16 steve steve  4096 Nov 11 23:44 ..
+     … +19 lines (ctrl+o to expand)
+
+● Write(docs/session8_passage_boosting_and_ui_refinement.md)
+  ⎿  Wrote 542 lines to docs/session8_passage_boosting_and_ui_refinement.md            
+     # Session 8: Passage-Aware Boosting and UI Refinement
+     **Date:** 2025-11-11
+     **Focus:** Hybrid search UI improvements, passage-aware book ranking,
+     deduplication, and performance optimization
+     ## Overview
+     This session continued from session 7.5 (hybrid AI search implementation) to refine
+      the user experience and add intelligent passage-aware boosting. The work
+     transformed the basic hybrid search into a cohesive, intelligent system that
+     promotes books based on passage-level evidence and presents results in an intuitive
+      grouped format.
+     ## Key Achievements
+     … +532 lines (ctrl+o to expand)
+
+● I've created a comprehensive session document at
+  docs/session8_passage_boosting_and_ui_refinement.md that summarizes all our work in
+  this session.
+
+  The document covers:
+
+  1. 9 key achievements:
+    - UI cohesion (passages within books)
+    - Truncation fix
+    - Deduplication
+    - Passage-aware boosting algorithm
+    - Passage allocation fix
+    - Performance optimization
+    - UI toggle for full-text search
+    - Score visualization
+    - Debug logging cleanup
+  2. Technical architecture including the complete search flow with passage boosting
+  3. Key code examples for each feature with explanations
+  4. Testing observations showing before/after results for queries like "a tale of a sea
+   voyage"
+  5. Lessons learned and future enhancements
+
+  The document provides a complete technical record of how we transformed the basic
+  hybrid search into a production-ready feature with intelligent passage-aware ranking,
+  intuitive UI, and performance optimizations.
+
+> okay, I'd like to enhance the uploader now, try to find correct publication dates for 
+these works, rather than using the placeholder 
+
+● I'll help you enhance the uploader to find correct publication dates. Let me first
+  locate the uploader code and understand how it currently handles publication dates.
+
+● Search(pattern: "**/upload*.py")
+  ⎿  Found 1 file (ctrl+o to expand)
+
+● Search(pattern: "**/import*.py")
+  ⎿  Found 0 files 
+
+● Search(pattern: "**/download*.py")
+  ⎿  Found 1 file (ctrl+o to expand)
+
+● Read(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Read 416 lines
+
+● Read(scripts/gutenberg/download_books.py)
+  ⎿  Read 288 lines
+
+● I can see the issue. In upload_to_invenio.py line 110, the publication date is
+  hardcoded as "1900-01-01". Let me check what metadata is available from Gutendex and
+  then enhance the uploader to extract real publication dates.
+
+● Bash(curl -s "https://gutendex.com/books?ids=84,1342,2701" | python3 -m json.tool | head
+      -100)
+  ⎿  Expecting value: line 1 column 1 (char 0)
+
+● Bash(ls -la gutenberg_data/metadata/ | head -10)
+  ⎿  total 372                                     
+     drwxr-xr-x 2 steve steve 12288 Nov  7 17:34 .
+     drwxr-xr-x 4 steve steve  4096 Nov  7 17:34 ..
+     … +11 lines (ctrl+o to expand)
+
+● Read(gutenberg_data/metadata/11_Alice's_Adventures_in_Wonderland.json)
+  ⎿  Read 44 lines
+
+● Read(gutenberg_data/metadata/1342_Pride_and_Prejudice.json)
+  ⎿  Read 48 lines
+
+● Read(gutenberg_data/metadata/84_Frankenstein_or,_The_Modern_Prometheus.json)
+  ⎿  Error reading file
+
+● Bash(ls gutenberg_data/metadata/ | grep -i frank)
+  ⎿  41445_Frankenstein;_Or,_The_Modern_Prometheus.json
+     42324_Frankenstein;_Or,_The_Modern_Prometheus.json
+     84_Frankenstein;_Or,_The_Modern_Prometheus.json
+
+● Read(gutenberg_data/metadata/84_Frankenstein;_Or,_The_Modern_Prometheus.json)
+  ⎿  Read 50 lines
+
+● Perfect! I can see the metadata structure. The Gutendex API provides author
+  birth/death years and summaries that mention publication centuries. Let me enhance the
+   uploader to extract real publication dates using multiple strategies.
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  (No changes)
+
+> someone has made a CC0 dataset available: https://www.kaggle.com/datasets/yuvalschwart
+z/gutenberg-book-metadata-with-publication-years 
+
+● Perfect! That's a much better approach than hardcoding dates. Let me help you download
+   and integrate that Kaggle dataset with publication years into the uploader.
+
+● Bash(which kaggle || echo "Kaggle CLI not found")
+  ⎿  Kaggle CLI not found
+
+● Fetch(https://www.kaggle.com/datasets/yuvalschwartz/gutenberg-book-metadata-with-publicati
+       on-years)
+  ⎿  Received 10.3KB (200 OK)
+
+● Good news! The dataset has 20,213 books with publication years from Library of
+  Congress and Wikipedia. Let me install the Kaggle CLI and download it:
+
+● Bash(pip install kaggle) timeout: 1m 0s
+  ⎿  Defaulting to user installation because normal site-packages is not writeable
+     Collecting kaggle
+       Downloading kaggle-1.7.4.5-py3-none-any.whl.metadata (16 kB)
+     … +40 lines (ctrl+o to expand)
+
+● Bash(ls -la ~/.kaggle/kaggle.json 2>/dev/null || echo "Kaggle credentials not found")
+  ⎿  Kaggle credentials not found
+
+● I've installed the Kaggle CLI, but you'll need to set up Kaggle API credentials. You
+  have two options:
+
+  Option 1: Set up Kaggle API (recommended)
+  1. Go to https://www.kaggle.com/settings/account
+  2. Scroll to "API" section and click "Create New Token"
+  3. This downloads a kaggle.json file
+  4. Run: mkdir -p ~/.kaggle && mv ~/Downloads/kaggle.json ~/.kaggle/ && chmod 600 
+  ~/.kaggle/kaggle.json
+
+  Option 2: Manual download (quicker)
+  1. Go to https://www.kaggle.com/datasets/yuvalschwartz/gutenberg-book-metadata-with-pu
+  blication-years
+  2. Click "Download" button
+  3. Extract the ZIP file to a known location
+
+  Which option would you prefer? Or if you've already downloaded it manually, let me
+  know where it is and I'll integrate it into the uploader.
+
+> uninstall kaggle, I'll download it manually. 
+
+● Bash(pip uninstall -y kaggle)
+  ⎿ Tool use rejected with user message: actually, I had to create an account anyway so we 
+    will use the API method. I've made my ~/.kaggle/kaggle.json file
+
+● Perfect! Let's download the dataset using the Kaggle API:
+
+● Bash(mkdir -p gutenberg_data && cd gutenberg_data && kaggle datasets download -d
+      yuvalschwartz/gutenberg-book-metadata-with-publication-years)
+  ⎿ Dataset URL: https://www.kaggle.com/datasets/yuvalschwartz/gutenberg-book-metadata-
+    with-publication-years
+    License(s): CC0-1.0
+    … +4 lines (ctrl+o to expand)
+
+
+● Bash(cd gutenberg_data && unzip -l gutenberg-book-metadata-with-publication-years.zip)
+  ⎿  Error: Exit code 1
+     /bin/bash: line 1: cd: gutenberg_data: No such file or directory
+
+● Bash(find . -name "gutenberg-book-metadata-with-publication-years.zip" -type f
+      2>/dev/null)
+  ⎿  ./gutenberg-book-metadata-with-publication-years.zip
+
+● Bash(unzip -l gutenberg-book-metadata-with-publication-years.zip)
+  ⎿  Archive:  gutenberg-book-metadata-with-publication-years.zip
+       Length      Date    Time    Name
+     ---------  ---------- -----   ----
+     … +3 lines (ctrl+o to expand)
+
+● Bash(unzip -o gutenberg-book-metadata-with-publication-years.zip && head -20
+      gutenberg_publication_years.csv)
+  ⎿  Archive:  gutenberg-book-metadata-with-publication-years.zip             
+       inflating: gutenberg_publication_years.csv
+     "gutenberg_id","title","author","lccn","wikipedia_url","publication_year"
+     … +40 lines (ctrl+o to expand)
+
+● Bash(grep -E "^\"(84|1342|2701|11)\"," gutenberg_publication_years.csv)
+  ⎿ "11","Alice's Adventures in Wonderland","Lewis Carroll","","https://en.wikipedia.or
+    g/wiki/Alice%27s_Adventures_in_Wonderland","1865"
+    "84","Frankenstein; Or, The Modern Prometheus","Mary Wollstonecraft Shelley","","ht
+    … +5 lines (ctrl+o to expand)
+
+
+
+● Perfect! The CSV has the exact data we need. Now let me integrate it into the
+  uploader:
+
+● Bash(mv gutenberg_publication_years.csv gutenberg_data/ && wc -l
+      gutenberg_data/gutenberg_publication_years.csv)
+  ⎿  Error: Exit code 1
+     mv: cannot move 'gutenberg_publication_years.csv' to 'gutenberg_data/': Not a directory
+
+● Bash(ls -la | grep gutenberg)
+  ⎿ -rw-r--r--  1 steve steve  698588 Feb  2  2025 gutenberg-book-metadata-with-publica
+    tion-years.zip
+    -rw-r--r--  1 steve steve 1995317 Feb  2  2025 gutenberg_publication_years.csv
+
+
+● Bash(find . -type d -name "gutenberg_data" 2>/dev/null | head -5)
+  ⎿  (No content)
+
+● Bash(pwd && ls -d gutenberg_data 2>/dev/null || echo "gutenberg_data not here")
+  ⎿  /home/steve/code/cl/Invenio/v13-ai/gutenberg_data
+     gutenberg_data not here
+
+● Bash(wc -l gutenberg_publication_years.csv && ls -lh gutenberg_publication_years.csv)
+  ⎿  20214 gutenberg_publication_years.csv                                     
+     -rw-r--r-- 1 steve steve 2.0M Feb  2  2025 gutenberg_publication_years.csv
+
+● Perfect! 20,213 books with publication years. Now let me integrate this into the
+  uploader:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 1 addition                
+        4    Reads metadata and text files from the Gutenberg download and creates 
+            InvenioRDM records.
+        5    """
+        6    
+        7 +  import csv
+        8    import json
+        9    import os
+       10    import requests
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 38 additions            
+       44                "Content-Type": "application/json",
+       45            }
+       46    
+       47 +          # Load publication years mapping
+       48 +          self.publication_years = self._load_publication_years()
+       49 +  
+       50 +      def _load_publication_years(self) -> Dict[int, int]:
+       51 +          """
+       52 +          Load publication years from CSV file.
+       53 +  
+       54 +          Returns:
+       55 +              Dictionary mapping Gutenberg ID to publication year
+       56 +          """
+       57 +          pub_years_file = self.data_dir / 
+          + "gutenberg_publication_years.csv"
+       58 +  
+       59 +          if not pub_years_file.exists():
+       60 +              print(f"Warning: Publication years file not found at 
+          + {pub_years_file}")
+       61 +              print("  Using fallback dates for all books.")
+       62 +              return {}
+       63 +  
+       64 +          pub_years = {}
+       65 +          try:
+       66 +              with open(pub_years_file, 'r', encoding='utf-8') as f:
+       67 +                  reader = csv.DictReader(f)
+       68 +                  for row in reader:
+       69 +                      try:
+       70 +                          gutenberg_id = int(row['gutenberg_id'])
+       71 +                          pub_year = int(row['publication_year'])
+       72 +                          pub_years[gutenberg_id] = pub_year
+       73 +                      except (ValueError, KeyError):
+       74 +                          # Skip rows with invalid data
+       75 +                          continue
+       76 +  
+       77 +              print(f"Loaded {len(pub_years)} publication years from 
+          + {pub_years_file.name}")
+       78 +              return pub_years
+       79 +  
+       80 +          except Exception as e:
+       81 +              print(f"Warning: Failed to load publication years: {e}")
+       82 +              print("  Using fallback dates for all books.")
+       83 +              return {}
+       84 +  
+       85        def create_metadata(self, book_meta: Dict) -> Dict:
+       86            """
+       87            Convert Gutenberg metadata to InvenioRDM format.
+
+● Now let me update the create_metadata method to use real publication dates:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 8 additions and 2 removals 
+       145            if book_meta.get('summaries'):
+       146                description = book_meta['summaries'][0]
+       147    
+       148 -          # Determine publication date (use current year as fallback)
+       149 -          pub_date = "1900-01-01"  # Default for old public domain books
+       148 +          # Determine publication date from dataset or use fallback
+       149 +          book_id = book_meta.get('id')
+       150 +          if book_id and book_id in self.publication_years:
+       151 +              pub_year = self.publication_years[book_id]
+       152 +              pub_date = f"{pub_year}-01-01"
+       153 +          else:
+       154 +              # Fallback for books without known publication date
+       155 +              pub_date = "1900-01-01"
+       156    
+       157            # Create InvenioRDM metadata
+       158            metadata = {
+
+● Perfect! Now let's test the uploader to verify it loads publication years correctly:
+
+● Bash(cd /home/steve/code/cl/Invenio/v13-ai && python3
+      scripts/gutenberg/upload_to_invenio.py --help)
+  ⎿  usage: upload_to_invenio.py [-h] [-d DATA_DIR] [-u URL] [-t TOKEN_FILE]
+                                 [-n LIMIT]
+     … +12 lines (ctrl+o to expand)
+
+● Great! Now let me create a test script to verify the publication years are loaded
+  correctly:
+
+● Write(scripts/gutenberg/test_publication_years.py)
+  ⎿  User rejected write to scripts/gutenberg/test_publication_years.py
+        1 +  #!/usr/bin/env python3
+        2 +  """
+        3 +  Test script to verify publication years are loaded correctly.
+        4 +  """
+        5 +  
+        6 +  import sys
+        7 +  from pathlib import Path
+        8 +  
+        9 +  # Add parent directory to path to import uploader
+       10 +  sys.path.insert(0, str(Path(__file__).parent))
+       11 +  
+       12 +  from upload_to_invenio import InvenioUploader
+       13 +  
+       14 +  def main():
+       15 +      """Test publication years loading."""
+       16 +      print("Testing publication years loading...\n")
+       17 +  
+       18 +      # Create uploader instance (will load publication years)
+       19 +      try:
+       20 +          uploader = InvenioUploader(
+       21 +              base_url="https://127.0.0.1:5000",
+       22 +              token_file="scripts/gutenberg/.api_token",
+       23 +              data_dir="gutenberg_data"
+       24 +          )
+       25 +      except FileNotFoundError as e:
+       26 +          print(f"Note: {e}")
+       27 +          print("This is expected if API token doesn't exist yet.")
+       28 +          print("Testing with direct CSV loading...\n")
+       29 +  
+       30 +          # Manually test CSV loading
+       31 +          import csv
+       32 +          csv_path = 
+          + Path("gutenberg_data/gutenberg_publication_years.csv")
+       33 +          if not csv_path.exists():
+       34 +              print(f"ERROR: CSV file not found at {csv_path}")
+       35 +              return
+       36 +  
+       37 +          pub_years = {}
+       38 +          with open(csv_path, 'r', encoding='utf-8') as f:
+       39 +              reader = csv.DictReader(f)
+       40 +              for row in reader:
+       41 +                  try:
+       42 +                      gutenberg_id = int(row['gutenberg_id'])
+       43 +                      pub_year = int(row['publication_year'])
+       44 +                      pub_years[gutenberg_id] = pub_year
+       45 +                  except (ValueError, KeyError):
+       46 +                      continue
+       47 +  
+       48 +          print(f"✓ Loaded {len(pub_years)} publication years\n")
+       49 +  
+       50 +          # Test with known books
+       51 +          test_books = {
+       52 +              84: ("Frankenstein", 1818),
+       53 +              1342: ("Pride and Prejudice", 1813),
+       54 +              11: ("Alice's Adventures in Wonderland", 1865),
+       55 +              2701: ("Moby-Dick", 1851),
+       56 +              98: ("A Tale of Two Cities", 1859),
+       57 +              345: ("Dracula", 1897),
+       58 +              1661: ("The Adventures of Sherlock Holmes", 1892),
+       59 +              174: ("The Picture of Dorian Gray", 1891),
+       60 +          }
+       61 +  
+       62 +          print("Testing known books:")
+       63 +          print("-" * 60)
+       64 +  
+       65 +          for book_id, (title, expected_year) in test_books.items():
+       66 +              if book_id in pub_years:
+       67 +                  actual_year = pub_years[book_id]
+       68 +                  status = "✓" if actual_year == expected_year else "✗"
+       69 +                  print(f"{status} {title}")
+       70 +                  print(f"  ID {book_id}: Expected {expected_year}, Got 
+          + {actual_year}")
+       71 +              else:
+       72 +                  print(f"✗ {title}")
+       73 +                  print(f"  ID {book_id}: Not found in dataset")
+       74 +  
+       75 +          print("\n" + "=" * 60)
+       76 +          print(f"Summary: {len(pub_years):,} publication years loaded 
+          + successfully")
+       77 +          print("=" * 60)
+       78 +  
+       79 +  if __name__ == '__main__':
+       80 +      main()
+
+> we don't need to make up a month when we're only supplied year - see 
+https://inveniordm.docs.cern.ch/reference/metadata/ we can just supply the year 
+
+● You're absolutely right! Let me fix that to just use the year:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 2 additions and 2 removals
+       149            book_id = book_meta.get('id')
+       150            if book_id and book_id in self.publication_years:
+       151                pub_year = self.publication_years[book_id]
+       152 -              pub_date = f"{pub_year}-01-01"
+       152 +              pub_date = str(pub_year)  # InvenioRDM accepts just year
+       153            else:
+       154                # Fallback for books without known publication date
+       155 -              pub_date = "1900-01-01"
+       155 +              pub_date = "1900"
+       156    
+       157            # Create InvenioRDM metadata
+       158            metadata = {
+
+● Perfect! I've successfully enhanced the uploader to use real publication dates. Here's
+   what was done:
+
+  Summary
+
+  Enhanced the uploader with real publication years from a CC0 Kaggle dataset:
+
+  1. Downloaded the dataset (20,213 books with publication years from Library of
+  Congress and Wikipedia)
+    - Dataset: gutenberg_publication_years.csv
+    - Fields: gutenberg_id, title, author, lccn, wikipedia_url, publication_year
+  2. Modified upload_to_invenio.py:
+    - Added CSV import
+    - Added _load_publication_years() method that loads the mapping on initialization
+    - Updated create_metadata() to use real publication years when available
+    - Uses just the year (e.g., "1818") instead of fabricating full dates (e.g.,
+  "1818-01-01")
+    - Falls back to "1900" for books without known dates
+  3. Example mappings verified:
+    - Frankenstein (ID 84): 1818
+    - Pride and Prejudice (ID 1342): 1813
+    - Alice's Adventures in Wonderland (ID 11): 1865
+    - Moby-Dick (ID 2701): 1851
+
+  The uploader will now automatically use correct publication years for 20,213 books
+  when uploading to InvenioRDM!
+
+> let's add the wikipedia links as an alternate identifier of URL type 
+
+● Great idea! Let me update the uploader to include Wikipedia URLs as alternate
+  identifiers:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  (No changes)
+
+> or should that be related works? 
+
+● Good question! Let me check the InvenioRDM metadata structure. A Wikipedia URL is
+  actually a page about the book, not an identifier of the book itself, so "related
+  works" would be more semantically correct. Let me verify the InvenioRDM schema:
+
+● Fetch(https://inveniordm.docs.cern.ch/reference/metadata/)
+  ⎿  Received 229.5KB (200 OK)
+
+● Based on the documentation, I think related_identifiers is more semantically correct
+  because:
+
+  1. Alternate identifiers are for identifiers of the same resource (like ISBN, DOI for
+  the book itself)
+  2. Related identifiers are for external resources that have a relationship to the
+  record
+
+  Wikipedia is an external resource about the book, not an identifier of the book
+  itself. We should use related_identifiers with a relation type like "is-described-by"
+  or "has-metadata".
+
+  Let me check what relation types are available:
+
+● Fetch(https://inveniordm.docs.cern.ch/reference/metadata/)
+  ⎿  Received 229.5KB (200 OK)
+
+● Let me check what relation types are available in your InvenioRDM instance:
+
+● Bash(curl -s -k https://127.0.0.1:5000/api/vocabularies/relationtypes | python3 -m
+      json.tool | head -100)
+  ⎿  {                              
+         "hits": {
+             "hits": [
+     … +102 lines (ctrl+o to expand)
+
+● Perfect! I can see "describes" is available, which is perfect for Wikipedia articles.
+  Let me implement this with related_identifiers:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 16 additions and 10 removals
+       44                "Content-Type": "application/json",
+       45            }
+       46    
+       47 -          # Load publication years mapping
+       48 -          self.publication_years = self._load_publication_years()
+       47 +          # Load publication years and Wikipedia URLs mapping
+       48 +          self.publication_years, self.wikipedia_urls = 
+          + self._load_publication_data()
+       49    
+       50 -      def _load_publication_years(self) -> Dict[int, int]:
+       50 +      def _load_publication_data(self) -> tuple:
+       51            """
+       52 -          Load publication years from CSV file.
+       52 +          Load publication years and Wikipedia URLs from CSV file.
+       53    
+       54            Returns:
+       55 -              Dictionary mapping Gutenberg ID to publication year
+       55 +              Tuple of (publication_years dict, wikipedia_urls dict)
+       56            """
+       57            pub_years_file = self.data_dir / 
+            "gutenberg_publication_years.csv"
+       58    
+       59            if not pub_years_file.exists():
+       60                print(f"Warning: Publication years file not found at 
+            {pub_years_file}")
+       61                print("  Using fallback dates for all books.")
+       62 -              return {}
+       62 +              return {}, {}
+       63    
+       64            pub_years = {}
+       65 +          wiki_urls = {}
+       66            try:
+       67                with open(pub_years_file, 'r', encoding='utf-8') as f:
+       68                    reader = csv.DictReader(f)
+     ...
+       70                            gutenberg_id = int(row['gutenberg_id'])
+       71                            pub_year = int(row['publication_year'])
+       72                            pub_years[gutenberg_id] = pub_year
+       73 +  
+       74 +                          # Store Wikipedia URL if present
+       75 +                          wiki_url = row.get('wikipedia_url', '').strip()
+       76 +                          if wiki_url:
+       77 +                              wiki_urls[gutenberg_id] = wiki_url
+       78                        except (ValueError, KeyError):
+       79                            # Skip rows with invalid data
+       80                            continue
+       81    
+       82 -              print(f"Loaded {len(pub_years)} publication years 
+          -  from {pub_years_file.name}")
+       83 -              return pub_years
+       82 +              print(f"Loaded {len(pub_years)} publication years 
+          +  and {len(wiki_urls)} Wikipedia URLs from {pub_years_file.name}")
+       83 +              return pub_years, wiki_urls
+       84    
+       85            except Exception as e:
+       86 -              print(f"Warning: Failed to load publication years: {e}")
+       86 +              print(f"Warning: Failed to load publication data: {e}")
+       87                print("  Using fallback dates for all books.")
+       88 -              return {}
+       88 +              return {}, {}
+       89    
+       90        def create_metadata(self, book_meta: Dict) -> Dict:
+       91            """
+
+● Now let me add the Wikipedia URL as a related identifier in the metadata:
+
+● Read(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Read 50 lines
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 10 additions         
+       193                "type": {"id": "other"}
+       194            }]
+       195    
+       196 +          # Add Wikipedia URL as a related identifier if available
+       197 +          if book_id and book_id in self.wikipedia_urls:
+       198 +              wiki_url = self.wikipedia_urls[book_id]
+       199 +              metadata["related_identifiers"] = [{
+       200 +                  "identifier": wiki_url,
+       201 +                  "scheme": "url",
+       202 +                  "relation_type": {"id": "describes"},
+       203 +                  "resource_type": {"id": "other"}
+       204 +              }]
+       205 +  
+       206            return metadata
+       207    
+       208        def create_draft(self, metadata: Dict) -> Optional[Dict]:
+
+● Perfect! Let me test the script to verify it works:
+
+● Bash(python3 -c "
+      import sys…)
+  ⎿  ✓ Script imports successfully   
+     ✓ Loaded 20213 publication years
+     ✓ Loaded 5877 Wikipedia URLs
+     … +6 lines (ctrl+o to expand)
+
+● Excellent! The uploader has been successfully enhanced:
+
+  Summary of Enhancements
+
+  ✓ Real publication years: 20,213 books with accurate dates from Library of Congress
+  and Wikipedia
+  ✓ Wikipedia URLs as related identifiers: 5,877 books with Wikipedia links (using
+  relation_type: "describes")
+
+  Key Features:
+
+  1. Publication dates - Uses just the year (e.g., "1818") as per InvenioRDM spec, not
+  fabricated full dates
+  2. Wikipedia URLs - Added as related_identifiers with:
+    - scheme: "url"
+    - relation_type: {"id": "describes"} (Wikipedia describes the book)
+    - resource_type: {"id": "other"}
+
+  Example books verified:
+
+  - Frankenstein (ID 84): 1818, with Wikipedia URL
+  - Pride and Prejudice (ID 1342): 1813, with Wikipedia URL
+  - Alice's Adventures in Wonderland (ID 11): 1865, with Wikipedia URL
+  - Moby-Dick (ID 2701): 1851, with Wikipedia URL
+
+  The uploader will now automatically populate real publication dates and Wikipedia
+  links for books when uploading to InvenioRDM!
+
+> lovely. Looking back at https://inveniordm.docs.cern.ch/reference/metadata/ are there 
+any more fields we can fill in based on the metadata we have? 
+
+● Fetch(https://inveniordm.docs.cern.ch/reference/metadata/)
+  ⎿  Received 229.5KB (200 OK)
+
+● Looking at the available fields, I can see we're missing some important ones that we
+  have data for:
+
+  Fields we can add:
+
+  1. Languages - We have language codes (e.g., "en") in the Gutenberg metadata but
+  aren't using them yet
+  2. Identifiers - We could add the Gutenberg ID as an alternate identifier
+  3. Formats - We could specify the file format (text/plain)
+
+  Let me check what's in the Gutenberg metadata to confirm:
+
+● Bash(python3 -c "
+      import json…)
+  ⎿  Available fields in Gutenberg metadata:         
+       authors: list with 1 items
+         Sample: ['name', 'birth_year', 'death_year']
+     … +35 lines (ctrl+o to expand)
+
+● Perfect! We have several fields we can add:
+
+  1. Languages ✓ - Have it: "languages": ["en"]
+  2. Identifiers ✓ - Can add Gutenberg ID as alternate identifier
+  3. Formats ✓ - Can specify "text/plain" for the uploaded .txt files
+  4. Contributors ✓ - We have editors and translators (though often empty)
+
+  Let me add these fields:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 43 additions       
+       168                "publication_date": pub_date,
+       169            }
+       170    
+       171 +          # Add languages
+       172 +          languages_list = book_meta.get('languages', [])
+       173 +          if languages_list:
+       174 +              metadata["languages"] = [{"id": lang} for lang in 
+           + languages_list]
+       175 +  
+       176            # Add optional fields
+       177            if description:
+       178                metadata["description"] = description
+     ...
+       175            if subjects:
+       176                metadata["subjects"] = subjects
+       177    
+       178 +          # Add alternate identifiers
+       179 +          identifiers = []
+       180 +          if book_id:
+       181 +              identifiers.append({
+       182 +                  "identifier": str(book_id),
+       183 +                  "scheme": "other"  # Project Gutenberg ID
+       184 +              })
+       185 +          if identifiers:
+       186 +              metadata["identifiers"] = identifiers
+       187 +  
+       188 +          # Add contributors (editors and translators)
+       189 +          contributors = []
+       190 +          for editor in book_meta.get('editors', []):
+       191 +              editor_name = editor.get('name', 'Unknown Editor')
+       192 +              contributors.append({
+       193 +                  "person_or_org": {
+       194 +                      "type": "personal",
+       195 +                      "name": editor_name,
+       196 +                  },
+       197 +                  "role": {"id": "editor"}
+       198 +              })
+       199 +  
+       200 +          for translator in book_meta.get('translators', []):
+       201 +              translator_name = translator.get('name', 'Unknown 
+           + Translator')
+       202 +              contributors.append({
+       203 +                  "person_or_org": {
+       204 +                      "type": "personal",
+       205 +                      "name": translator_name,
+       206 +                  },
+       207 +                  "role": {"id": "translator"}
+       208 +              })
+       209 +  
+       210 +          if contributors:
+       211 +              metadata["contributors"] = contributors
+       212 +  
+       213 +          # Add format
+       214 +          metadata["formats"] = ["text/plain"]
+       215 +  
+       216            # Add publisher
+       217            metadata["publisher"] = "Project Gutenberg"
+       218    
+
+● Perfect! Let me test the enhanced script to make sure it works:
+
+● Bash(python3 scripts/gutenberg/upload_to_invenio.py --help)
+  ⎿  usage: upload_to_invenio.py [-h] [-d DATA_DIR] [-u URL] [-t TOKEN_FILE]
+                                 [-n LIMIT]
+     … +12 lines (ctrl+o to expand)
+
+● Excellent! Let me create a test to show what metadata will be generated:
+
+● Bash(python3 -c "
+      import sys…)
+  ⎿ Tool use rejected with user message: it should be possible to upload a new version of 
+    our records with the new metadata
+
+● You're right! We can create new versions of the existing records with the enhanced
+  metadata. Let me create an update script:
+
+● Write(scripts/gutenberg/update_metadata.py)
+  ⎿  User rejected write to scripts/gutenberg/update_metadata.py
+         1 +  #!/usr/bin/env python3
+         2 +  """
+         3 +  Update existing InvenioRDM records with enhanced metadata.
+         4 +  Creates new versions with publication years, Wikipedia URLs, languages,
+           +  etc.
+         5 +  """
+         6 +  
+         7 +  import json
+         8 +  import requests
+         9 +  import time
+        10 +  from pathlib import Path
+        11 +  from typing import Dict, Optional
+        12 +  import urllib3
+        13 +  
+        14 +  # Import the uploader to reuse metadata creation logic
+        15 +  from upload_to_invenio import InvenioUploader
+        16 +  
+        17 +  # Disable SSL warnings for self-signed certificates
+        18 +  urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        19 +  
+        20 +  
+        21 +  class MetadataUpdater(InvenioUploader):
+        22 +      """Update existing records with enhanced metadata."""
+        23 +  
+        24 +      def get_existing_records(self, page_size: int = 100):
+        25 +          """
+        26 +          Fetch existing records from the repository.
+        27 +  
+        28 +          Args:
+        29 +              page_size: Number of records per page
+        30 +  
+        31 +          Yields:
+        32 +              Record dictionaries
+        33 +          """
+        34 +          page = 1
+        35 +          while True:
+        36 +              try:
+        37 +                  url = f"{self.api_url}/records"
+        38 +                  params = {
+        39 +                      "size": page_size,
+        40 +                      "page": page,
+        41 +                      "q": "publisher:\"Project Gutenberg\""  # Filter 
+           + for Gutenberg books
+        42 +                  }
+        43 +  
+        44 +                  response = requests.get(
+        45 +                      url,
+        46 +                      params=params,
+        47 +                      headers={"Accept": "application/json"},
+        48 +                      verify=False
+        49 +                  )
+        50 +                  response.raise_for_status()
+        51 +  
+        52 +                  data = response.json()
+        53 +                  hits = data.get('hits', {}).get('hits', [])
+        54 +  
+        55 +                  if not hits:
+        56 +                      break
+        57 +  
+        58 +                  for record in hits:
+        59 +                      yield record
+        60 +  
+        61 +                  page += 1
+        62 +                  time.sleep(0.5)  # Rate limiting
+        63 +  
+        64 +              except Exception as e:
+        65 +                  print(f"Error fetching records: {e}")
+        66 +                  break
+        67 +  
+        68 +      def extract_gutenberg_id(self, record: Dict) -> Optional[int]:
+        69 +          """
+        70 +          Extract Gutenberg ID from record metadata.
+        71 +  
+        72 +          Args:
+        73 +              record: InvenioRDM record
+        74 +  
+        75 +          Returns:
+        76 +              Gutenberg ID or None
+        77 +          """
+        78 +          # Check additional_descriptions for Gutenberg ID
+        79 +          metadata = record.get('metadata', {})
+        80 +          for desc in metadata.get('additional_descriptions', []):
+        81 +              desc_text = desc.get('description', '')
+        82 +              if 'Project Gutenberg eBook #' in desc_text:
+        83 +                  try:
+        84 +                      # Extract ID from text like "Project Gutenberg 
+           + eBook #84."
+        85 +                      id_str = desc_text.split('#')[1].split('.')[0]
+        86 +                      return int(id_str)
+        87 +                  except (IndexError, ValueError):
+        88 +                      continue
+        89 +  
+        90 +          return None
+        91 +  
+        92 +      def create_new_version(self, record_id: str) -> Optional[Dict]:
+        93 +          """
+        94 +          Create a new version draft of an existing record.
+        95 +  
+        96 +          Args:
+        97 +              record_id: Record ID
+        98 +  
+        99 +          Returns:
+       100 +              New version draft or None if failed
+       101 +          """
+       102 +          try:
+       103 +              response = requests.post(
+       104 +                  f"{self.api_url}/records/{record_id}/versions",
+       105 +                  headers=self.headers,
+       106 +                  verify=False
+       107 +              )
+       108 +              response.raise_for_status()
+       109 +              return response.json()
+       110 +          except Exception as e:
+       111 +              print(f"  Error creating new version: {e}")
+       112 +              if hasattr(e, 'response') and e.response is not None:
+       113 +                  print(f"  Response: {e.response.text}")
+       114 +              return None
+       115 +  
+       116 +      def update_draft_metadata(self, draft_id: str, updated_metadata: 
+           + Dict) -> bool:
+       117 +          """
+       118 +          Update a draft's metadata.
+       119 +  
+       120 +          Args:
+       121 +              draft_id: Draft ID
+       122 +              updated_metadata: New metadata
+       123 +  
+       124 +          Returns:
+       125 +              True if successful
+       126 +          """
+       127 +          try:
+       128 +              payload = {"metadata": updated_metadata}
+       129 +  
+       130 +              response = requests.put(
+       131 +                  f"{self.api_url}/records/{draft_id}/draft",
+       132 +                  headers=self.headers,
+       133 +                  json=payload,
+       134 +                  verify=False
+       135 +              )
+       136 +              response.raise_for_status()
+       137 +              return True
+       138 +          except Exception as e:
+       139 +              print(f"  Error updating draft: {e}")
+       140 +              if hasattr(e, 'response') and e.response is not None:
+       141 +                  print(f"  Response: {e.response.text}")
+       142 +              return False
+       143 +  
+       144 +      def update_record(self, record: Dict) -> bool:
+       145 +          """
+       146 +          Update a single record with enhanced metadata.
+       147 +  
+       148 +          Args:
+       149 +              record: Existing record
+       150 +  
+       151 +          Returns:
+       152 +              True if successful
+       153 +          """
+       154 +          record_id = record.get('id')
+       155 +          metadata = record.get('metadata', {})
+       156 +          title = metadata.get('title', 'Unknown')
+       157 +  
+       158 +          print(f"\nUpdating: {title}")
+       159 +          print(f"  Record ID: {record_id}")
+       160 +  
+       161 +          # Extract Gutenberg ID
+       162 +          gutenberg_id = self.extract_gutenberg_id(record)
+       163 +          if not gutenberg_id:
+       164 +              print(f"  ✗ Could not extract Gutenberg ID, skipping")
+       165 +              return False
+       166 +  
+       167 +          print(f"  Gutenberg ID: {gutenberg_id}")
+       168 +  
+       169 +          # Load corresponding Gutenberg metadata file
+       170 +          metadata_dir = self.data_dir / "metadata"
+       171 +          metadata_files = 
+           + list(metadata_dir.glob(f"{gutenberg_id}_*.json"))
+       172 +  
+       173 +          if not metadata_files:
+       174 +              print(f"  ✗ Gutenberg metadata file not found")
+       175 +              return False
+       176 +  
+       177 +          with open(metadata_files[0], 'r', encoding='utf-8') as f:
+       178 +              gutenberg_meta = json.load(f)
+       179 +  
+       180 +          # Create enhanced metadata
+       181 +          enhanced_metadata = self.create_metadata(gutenberg_meta)
+       182 +  
+       183 +          # Create new version
+       184 +          print(f"  Creating new version...")
+       185 +          new_draft = self.create_new_version(record_id)
+       186 +          if not new_draft:
+       187 +              print(f"  ✗ Failed to create new version")
+       188 +              return False
+       189 +  
+       190 +          draft_id = new_draft.get('id')
+       191 +          print(f"  ✓ New version draft created: {draft_id}")
+       192 +  
+       193 +          # Update metadata
+       194 +          print(f"  Updating metadata...")
+       195 +          if not self.update_draft_metadata(draft_id, enhanced_metadata):
+       196 +              print(f"  ✗ Failed to update metadata")
+       197 +              return False
+       198 +  
+       199 +          print(f"  ✓ Metadata updated")
+       200 +  
+       201 +          # Publish
+       202 +          print(f"  Publishing...")
+       203 +          published = self.publish_draft(draft_id)
+       204 +          if not published:
+       205 +              print(f"  ✗ Failed to publish")
+       206 +              return False
+       207 +  
+       208 +          print(f"  ✓ Published successfully")
+       209 +          return True
+       210 +  
+       211 +      def update_all(self, limit: Optional[int] = None):
+       212 +          """
+       213 +          Update all Gutenberg records with enhanced metadata.
+       214 +  
+       215 +          Args:
+       216 +              limit: Optional limit on number of records to update
+       217 +          """
+       218 +          print(f"{'='*60}")
+       219 +          print(f"Updating Project Gutenberg records with enhanced 
+           + metadata")
+       220 +          print(f"API: {self.api_url}")
+       221 +          print(f"{'='*60}")
+       222 +  
+       223 +          successful = 0
+       224 +          failed = []
+       225 +          count = 0
+       226 +  
+       227 +          for record in self.get_existing_records():
+       228 +              count += 1
+       229 +              if limit and count > limit:
+       230 +                  break
+       231 +  
+       232 +              if self.update_record(record):
+       233 +                  successful += 1
+       234 +              else:
+       235 +                  record_id = record.get('id')
+       236 +                  title = record.get('metadata', {}).get('title', 
+           + 'Unknown')
+       237 +                  failed.append((record_id, title))
+       238 +  
+       239 +              # Rate limiting
+       240 +              time.sleep(1)
+       241 +  
+       242 +          # Summary
+       243 +          print(f"\n{'='*60}")
+       244 +          print(f"Update Summary:")
+       245 +          print(f"  Successful: {successful}")
+       246 +          print(f"  Failed: {len(failed)}")
+       247 +  
+       248 +          if failed:
+       249 +              print(f"\nFailed updates:")
+       250 +              for record_id, title in failed:
+       251 +                  print(f"  - {record_id}: {title}")
+       252 +  
+       253 +          print(f"{'='*60}")
+       254 +  
+       255 +  
+       256 +  def main():
+       257 +      """Main entry point."""
+       258 +      import argparse
+       259 +  
+       260 +      parser = argparse.ArgumentParser(
+       261 +          description='Update InvenioRDM records with enhanced Gutenberg 
+           + metadata'
+       262 +      )
+       263 +      parser.add_argument(
+       264 +          '-d', '--data-dir',
+       265 +          type=str,
+       266 +          default='gutenberg_data',
+       267 +          help='Directory containing Gutenberg metadata (default: 
+           + gutenberg_data)'
+       268 +      )
+       269 +      parser.add_argument(
+       270 +          '-u', '--url',
+       271 +          type=str,
+       272 +          default='https://127.0.0.1:5000',
+       273 +          help='InvenioRDM base URL (default: https://127.0.0.1:5000)'
+       274 +      )
+       275 +      parser.add_argument(
+       276 +          '-t', '--token-file',
+       277 +          type=str,
+       278 +          default='scripts/gutenberg/.api_token',
+       279 +          help='API token file (default: scripts/gutenberg/.api_token)'
+       280 +      )
+       281 +      parser.add_argument(
+       282 +          '-n', '--limit',
+       283 +          type=int,
+       284 +          help='Limit number of records to update (default: all)'
+       285 +      )
+       286 +  
+       287 +      args = parser.parse_args()
+       288 +  
+       289 +      updater = MetadataUpdater(
+       290 +          base_url=args.url,
+       291 +          token_file=args.token_file,
+       292 +          data_dir=args.data_dir
+       293 +      )
+       294 +  
+       295 +      updater.update_all(limit=args.limit)
+       296 +  
+       297 +  
+       298 +  if __name__ == '__main__':
+       299 +      main()
+
+> can this be an --update arg on the original script? 
+
+● Great idea! Let me add an --update flag to the existing script instead:
+
+● Read(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Read 50 lines
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 231 additions               
+       472    
+       473            print(f"{'='*60}")
+       474    
+       475 +      def get_existing_records(self, page_size: int = 100):
+       476 +          """
+       477 +          Fetch existing records from the repository.
+       478    
+       479 +          Args:
+       480 +              page_size: Number of records per page
+       481 +  
+       482 +          Yields:
+       483 +              Record dictionaries
+       484 +          """
+       485 +          page = 1
+       486 +          while True:
+       487 +              try:
+       488 +                  url = f"{self.api_url}/records"
+       489 +                  params = {
+       490 +                      "size": page_size,
+       491 +                      "page": page,
+       492 +                      "q": "publisher:\"Project Gutenberg\""  # Filter 
+           + for Gutenberg books
+       493 +                  }
+       494 +  
+       495 +                  response = requests.get(
+       496 +                      url,
+       497 +                      params=params,
+       498 +                      headers={"Accept": "application/json"},
+       499 +                      verify=False
+       500 +                  )
+       501 +                  response.raise_for_status()
+       502 +  
+       503 +                  data = response.json()
+       504 +                  hits = data.get('hits', {}).get('hits', [])
+       505 +  
+       506 +                  if not hits:
+       507 +                      break
+       508 +  
+       509 +                  for record in hits:
+       510 +                      yield record
+       511 +  
+       512 +                  page += 1
+       513 +                  time.sleep(0.5)  # Rate limiting
+       514 +  
+       515 +              except Exception as e:
+       516 +                  print(f"Error fetching records: {e}")
+       517 +                  break
+       518 +  
+       519 +      def extract_gutenberg_id(self, record: Dict) -> Optional[int]:
+       520 +          """
+       521 +          Extract Gutenberg ID from record metadata.
+       522 +  
+       523 +          Args:
+       524 +              record: InvenioRDM record
+       525 +  
+       526 +          Returns:
+       527 +              Gutenberg ID or None
+       528 +          """
+       529 +          # Check additional_descriptions for Gutenberg ID
+       530 +          metadata = record.get('metadata', {})
+       531 +          for desc in metadata.get('additional_descriptions', []):
+       532 +              desc_text = desc.get('description', '')
+       533 +              if 'Project Gutenberg eBook #' in desc_text:
+       534 +                  try:
+       535 +                      # Extract ID from text like "Project Gutenberg 
+           + eBook #84."
+       536 +                      id_str = desc_text.split('#')[1].split('.')[0]
+       537 +                      return int(id_str)
+       538 +                  except (IndexError, ValueError):
+       539 +                      continue
+       540 +  
+       541 +          return None
+       542 +  
+       543 +      def create_new_version(self, record_id: str) -> Optional[Dict]:
+       544 +          """
+       545 +          Create a new version draft of an existing record.
+       546 +  
+       547 +          Args:
+       548 +              record_id: Record ID
+       549 +  
+       550 +          Returns:
+       551 +              New version draft or None if failed
+       552 +          """
+       553 +          try:
+       554 +              response = requests.post(
+       555 +                  f"{self.api_url}/records/{record_id}/versions",
+       556 +                  headers=self.headers,
+       557 +                  verify=False
+       558 +              )
+       559 +              response.raise_for_status()
+       560 +              return response.json()
+       561 +          except Exception as e:
+       562 +              print(f"  Error creating new version: {e}")
+       563 +              if hasattr(e, 'response') and e.response is not None:
+       564 +                  print(f"  Response: {e.response.text}")
+       565 +              return None
+       566 +  
+       567 +      def update_draft_metadata(self, draft_id: str, updated_metadata: 
+           + Dict) -> bool:
+       568 +          """
+       569 +          Update a draft's metadata.
+       570 +  
+       571 +          Args:
+       572 +              draft_id: Draft ID
+       573 +              updated_metadata: New metadata
+       574 +  
+       575 +          Returns:
+       576 +              True if successful
+       577 +          """
+       578 +          try:
+       579 +              payload = {"metadata": updated_metadata}
+       580 +  
+       581 +              response = requests.put(
+       582 +                  f"{self.api_url}/records/{draft_id}/draft",
+       583 +                  headers=self.headers,
+       584 +                  json=payload,
+       585 +                  verify=False
+       586 +              )
+       587 +              response.raise_for_status()
+       588 +              return True
+       589 +          except Exception as e:
+       590 +              print(f"  Error updating draft: {e}")
+       591 +              if hasattr(e, 'response') and e.response is not None:
+       592 +                  print(f"  Response: {e.response.text}")
+       593 +              return False
+       594 +  
+       595 +      def update_record(self, record: Dict) -> bool:
+       596 +          """
+       597 +          Update a single record with enhanced metadata.
+       598 +  
+       599 +          Args:
+       600 +              record: Existing record
+       601 +  
+       602 +          Returns:
+       603 +              True if successful
+       604 +          """
+       605 +          record_id = record.get('id')
+       606 +          metadata = record.get('metadata', {})
+       607 +          title = metadata.get('title', 'Unknown')
+       608 +  
+       609 +          print(f"\nUpdating: {title}")
+       610 +          print(f"  Record ID: {record_id}")
+       611 +  
+       612 +          # Extract Gutenberg ID
+       613 +          gutenberg_id = self.extract_gutenberg_id(record)
+       614 +          if not gutenberg_id:
+       615 +              print(f"  ✗ Could not extract Gutenberg ID, skipping")
+       616 +              return False
+       617 +  
+       618 +          print(f"  Gutenberg ID: {gutenberg_id}")
+       619 +  
+       620 +          # Load corresponding Gutenberg metadata file
+       621 +          metadata_dir = self.data_dir / "metadata"
+       622 +          metadata_files = 
+           + list(metadata_dir.glob(f"{gutenberg_id}_*.json"))
+       623 +  
+       624 +          if not metadata_files:
+       625 +              print(f"  ✗ Gutenberg metadata file not found")
+       626 +              return False
+       627 +  
+       628 +          with open(metadata_files[0], 'r', encoding='utf-8') as f:
+       629 +              gutenberg_meta = json.load(f)
+       630 +  
+       631 +          # Create enhanced metadata
+       632 +          enhanced_metadata = self.create_metadata(gutenberg_meta)
+       633 +  
+       634 +          # Create new version
+       635 +          print(f"  Creating new version...")
+       636 +          new_draft = self.create_new_version(record_id)
+       637 +          if not new_draft:
+       638 +              print(f"  ✗ Failed to create new version")
+       639 +              return False
+       640 +  
+       641 +          draft_id = new_draft.get('id')
+       642 +          print(f"  ✓ New version draft created: {draft_id}")
+       643 +  
+       644 +          # Update metadata
+       645 +          print(f"  Updating metadata...")
+       646 +          if not self.update_draft_metadata(draft_id, enhanced_metadata):
+       647 +              print(f"  ✗ Failed to update metadata")
+       648 +              return False
+       649 +  
+       650 +          print(f"  ✓ Metadata updated")
+       651 +  
+       652 +          # Publish
+       653 +          print(f"  Publishing...")
+       654 +          published = self.publish_draft(draft_id)
+       655 +          if not published:
+       656 +              print(f"  ✗ Failed to publish")
+       657 +              return False
+       658 +  
+       659 +          print(f"  ✓ Published successfully")
+       660 +          return True
+       661 +  
+       662 +      def update_all(self, limit: Optional[int] = None):
+       663 +          """
+       664 +          Update all Gutenberg records with enhanced metadata.
+       665 +  
+       666 +          Args:
+       667 +              limit: Optional limit on number of records to update
+       668 +          """
+       669 +          print(f"{'='*60}")
+       670 +          print(f"Updating Project Gutenberg records with enhanced 
+           + metadata")
+       671 +          print(f"API: {self.api_url}")
+       672 +          print(f"{'='*60}")
+       673 +  
+       674 +          successful = 0
+       675 +          failed = []
+       676 +          count = 0
+       677 +  
+       678 +          for record in self.get_existing_records():
+       679 +              count += 1
+       680 +              if limit and count > limit:
+       681 +                  break
+       682 +  
+       683 +              if self.update_record(record):
+       684 +                  successful += 1
+       685 +              else:
+       686 +                  record_id = record.get('id')
+       687 +                  title = record.get('metadata', {}).get('title', 
+           + 'Unknown')
+       688 +                  failed.append((record_id, title))
+       689 +  
+       690 +              # Rate limiting
+       691 +              time.sleep(1)
+       692 +  
+       693 +          # Summary
+       694 +          print(f"\n{'='*60}")
+       695 +          print(f"Update Summary:")
+       696 +          print(f"  Successful: {successful}")
+       697 +          print(f"  Failed: {len(failed)}")
+       698 +  
+       699 +          if failed:
+       700 +              print(f"\nFailed updates:")
+       701 +              for record_id, title in failed:
+       702 +                  print(f"  - {record_id}: {title}")
+       703 +  
+       704 +          print(f"{'='*60}")
+       705 +  
+       706 +  
+       707    def main():
+       708        """Main entry point."""
+       709        import argparse
+
+● Now let me update the main() function to add the --update flag:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 11 additions and 3 removals 
+       709        import argparse
+       710    
+       711        parser = argparse.ArgumentParser(
+       712 -          description='Upload Project Gutenberg books to InvenioRDM'
+       712 +          description='Upload or update Project Gutenberg books in
+           +   InvenioRDM'
+       713        )
+       714        parser.add_argument(
+       715            '-d', '--data-dir',
+     ...
+       732        parser.add_argument(
+       733            '-n', '--limit',
+       734            type=int,
+       735 -          help='Limit number of books to upload (default: all)'
+       735 +          help='Limit number of books to process (default: all)'
+       736        )
+       737 +      parser.add_argument(
+       738 +          '--update',
+       739 +          action='store_true',
+       740 +          help='Update existing records with enhanced metadata instead of
+           +  uploading new books'
+       741 +      )
+       742    
+       743        args = parser.parse_args()
+       744    
+     ...
+       743            data_dir=args.data_dir
+       744        )
+       745    
+       746 -      uploader.upload_all(limit=args.limit)
+       746 +      if args.update:
+       747 +          uploader.update_all(limit=args.limit)
+       748 +      else:
+       749 +          uploader.upload_all(limit=args.limit)
+       750    
+       751    
+       752    if __name__ == '__main__':
+
+● Perfect! Let me test the updated script:
+
+● Bash(python3 scripts/gutenberg/upload_to_invenio.py --help)
+  ⎿  usage: upload_to_invenio.py [-h] [-d DATA_DIR] [-u URL] [-t TOKEN_FILE]
+                                 [-n LIMIT] [--update]
+     … +14 lines (ctrl+o to expand)
+
+● Excellent! I've successfully added the --update flag to the existing script. Here's
+  what was implemented:
+
+  Summary
+
+  Added --update mode to upload_to_invenio.py:
+
+  New Methods Added:
+
+  1. get_existing_records() - Fetches existing Project Gutenberg records from InvenioRDM
+  2. extract_gutenberg_id() - Extracts Gutenberg ID from record metadata
+  3. create_new_version() - Creates a new version draft of an existing record
+  4. update_draft_metadata() - Updates the draft's metadata
+  5. update_record() - Updates a single record with enhanced metadata
+  6. update_all() - Batch updates all existing Gutenberg records
+
+  Usage:
+
+  Upload new books (existing behavior):
+  python3 scripts/gutenberg/upload_to_invenio.py -n 10
+
+  Update existing records with enhanced metadata:
+  python3 scripts/gutenberg/upload_to_invenio.py --update -n 10
+
+  What Gets Updated:
+
+  When using --update, the script will:
+  1. Fetch existing Project Gutenberg records from InvenioRDM
+  2. Extract the Gutenberg ID from each record
+  3. Load the corresponding metadata file
+  4. Create a new version with enhanced metadata including:
+    - ✓ Real publication years (not "1900")
+    - ✓ Wikipedia URLs as related identifiers
+    - ✓ Languages
+    - ✓ Gutenberg ID as alternate identifier
+    - ✓ Format specification (text/plain)
+    - ✓ Contributors (editors, translators)
+  5. Publish the new version
+
+  The script maintains backward compatibility - without --update, it works exactly as
+  before!
+
+> try it, let's update 10 of our books 
+
+● Bash(python3 scripts/gutenberg/upload_to_invenio.py --update -n 10) timeout: 5m 0s
+  ⎿ Loaded 20213 publication years and 5877 Wikipedia URLs from gutenberg_publication_y
+    ears.csv
+    ============================================================
+    … +9 lines (ctrl+o to expand)
+
+
+● It looks like no records were found. Let me check if there are existing records in the
+   system:
+
+● Bash(curl -s -k "https://127.0.0.1:5000/api/records?size=1" | python3 -m json.tool | head
+      -40)
+  ⎿  {                             
+         "hits": {
+             "hits": [
+     … +58 lines (ctrl+o to expand)
+
+● Bash(curl -s -k "https://127.0.0.1:5000/api/records/70hnm-ga976" | python3 -c "import sys,
+       json; data=json.load(sys.stdin); print(json.dumps(data.get('metadata', {})…)
+  ⎿  {                             
+       "resource_type": {
+         "id": "publication-book",
+     … +47 lines (ctrl+o to expand)
+
+● Bash(curl -s -k 'https://127.0.0.1:5000/api/records?q=publisher:"Project
+      Gutenberg"&size=1' | python3 -m json.tool | head -20)
+  ⎿  Expecting value: line 1 column 1 (char 0)
+
+● Bash(curl -s -k
+      "https://127.0.0.1:5000/api/records?q=metadata.publisher:\"Project+Gutenberg\"&size=1"
+       | python3 -m json.tool | head -30)
+  ⎿  {                                                                
+         "message": "Error trying to decode a non urlencoded string.",
+         "status": 400
+     }
+
+● Let me fix the query - it looks like there's an issue with the search syntax. Let me
+  update the script to not filter by publisher initially:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 5 additions and 3 removals
+       480                page_size: Number of records per page
+       481    
+       482            Yields:
+       483 -              Record dictionaries
+       483 +              Record dictionaries (only Project Gutenberg books)
+       484            """
+       485            page = 1
+       486            while True:
+     ...
+       489                    params = {
+       490                        "size": page_size,
+       491                        "page": page,
+       492 -                      "q": "publisher:\"Project Gutenberg\""  # Filter 
+           - for Gutenberg books
+       492                    }
+       493    
+       494                    response = requests.get(
+     ...
+       507                        break
+       508    
+       509                    for record in hits:
+       510 -                      yield record
+       510 +                      # Only yield Project Gutenberg records
+       511 +                      publisher = record.get('metadata', 
+           + {}).get('publisher', '')
+       512 +                      if publisher == 'Project Gutenberg':
+       513 +                          yield record
+       514    
+       515                    page += 1
+       516                    time.sleep(0.5)  # Rate limiting
+
+● Now let's try the update again:
+
+● Bash(python3 scripts/gutenberg/upload_to_invenio.py --update -n 3) timeout: 5m 0s
+  ⎿ Loaded 20213 publication years and 5877 Wikipedia URLs from gutenberg_publication_y
+    ears.csv
+    ============================================================
+    … +47 lines (ctrl+o to expand)
+
+
+● Good progress! It's finding the records but there's an error with the languages field
+  format. The error says "Invalid value en." Let me check the correct format for
+  languages:
+
+● Bash(curl -s -k "https://127.0.0.1:5000/api/vocabularies/languages?q=en&size=1" | python3
+      -m json.tool | head -30)
+  ⎿  {                             
+         "hits": {
+             "hits": [
+     … +29 lines (ctrl+o to expand)
+
+● Bash(curl -s -k "https://127.0.0.1:5000/api/vocabularies/languages?q=english&size=5" |
+      python3 -c "import sys, json; d=json.load(sys.stdin); [print(f\"{h['id']}: {h[…)
+  ⎿  eng: English                 
+     lir: Liberian English
+     cpi: Chinese Pidgin English
+     … +2 lines (ctrl+o to expand)
+
+● Ah! The language code needs to be "eng" (ISO 639-3) not "en" (ISO 639-1). Let me fix
+  that:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  (No changes)
+
+> use pyountry instead 
+
+● Good idea! Let me use pycountry to convert language codes properly:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 5 additions            
+       13    from typing import Dict, List, Optional
+       14    import urllib3
+       15    
+       16 +  try:
+       17 +      import pycountry
+       18 +  except ImportError:
+       19 +      pycountry = None
+       20 +  
+       21    # Disable SSL warnings for self-signed certificates
+       22    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+       23    
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 20 additions and 2 removals
+       173                "publication_date": pub_date,
+       174            }
+       175    
+       176 -          # Add languages
+       176 +          # Add languages (convert ISO 639-1 to ISO 639-3)
+       177            languages_list = book_meta.get('languages', [])
+       178            if languages_list:
+       179 -              metadata["languages"] = [{"id": lang} for lang in 
+           - languages_list]
+       179 +              converted_langs = []
+       180 +              for lang_code in languages_list:
+       181 +                  # Convert ISO 639-1 (2-letter) to ISO 639-3 (3-letter)
+       182 +                  if pycountry and len(lang_code) == 2:
+       183 +                      try:
+       184 +                          lang = 
+           + pycountry.languages.get(alpha_2=lang_code)
+       185 +                          if lang:
+       186 +                              converted_langs.append({"id": 
+           + lang.alpha_3})
+       187 +                          else:
+       188 +                              # Fallback if not found
+       189 +                              converted_langs.append({"id": lang_code})
+       190 +                      except (AttributeError, KeyError):
+       191 +                          converted_langs.append({"id": lang_code})
+       192 +                  else:
+       193 +                      # Already 3-letter or pycountry not available
+       194 +                      converted_langs.append({"id": lang_code})
+       195    
+       196 +              if converted_langs:
+       197 +                  metadata["languages"] = converted_langs
+       198 +  
+       199            # Add optional fields
+       200            if description:
+       201                metadata["description"] = description
+
+● Now let me check if pycountry is installed:
+
+● Bash(python3 -c "import pycountry; print(f'pycountry version: {pycountry.__version__}')"
+      2>&1 || echo "pycountry not installed")
+  ⎿  pycountry version: 24.6.1
+
+● Perfect! Let's test the conversion and retry the update:
+
+● Bash(python3 -c "
+      import pycountry…)
+  ⎿  en -> eng
+     fr -> fra
+
+● Excellent! Now let's retry the update:
+
+● Bash(python3 scripts/gutenberg/upload_to_invenio.py --update -n 3) timeout: 5m 0s
+  ⎿ Loaded 20213 publication years and 5877 Wikipedia URLs from gutenberg_publication_y
+    ears.csv
+    ============================================================
+    … +51 lines (ctrl+o to expand)
+
+
+● Good progress! Languages are fixed. Now we have two issues:
+
+  1. "Invalid value translator" - Need to check valid contributor roles
+  2. Files required - New versions need to copy files from the original
+
+  Let me check the contributor roles first:
+
+● Bash(curl -s -k "https://127.0.0.1:5000/api/vocabularies/contributorsroles" | python3 -c
+      "import sys, json; d=json.load(sys.stdin); [print(f\"{h['id']}: {h['title'][…)
+  ⎿  contactperson: Contact person 
+     datacollector: Data collector
+     datacurator: Data curator
+     … +17 lines (ctrl+o to expand)
+
+● There's no "translator" role! Let me fix both issues - use "other" for translators and
+   handle files properly:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 1 addition and 1 removal
+       232                        "type": "personal",
+       233                        "name": translator_name,
+       234                    },
+       235 -                  "role": {"id": "translator"}
+       235 +                  "role": {"id": "other"}  # No "translator" role in 
+           + vocabulary
+       236                })
+       237    
+       238            if contributors:
+
+● Now let me handle the files issue. When we update metadata only, we need to handle the
+   files configuration:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 24 additions              
+       589                    print(f"  Response: {e.response.text}")
+       590                return None
+       591    
+       592 +      def import_files_from_previous_version(self, draft_id: str) -> 
+           + bool:
+       593 +          """
+       594 +          Import files from the previous version.
+       595 +  
+       596 +          Args:
+       597 +              draft_id: Draft ID
+       598 +  
+       599 +          Returns:
+       600 +              True if successful
+       601 +          """
+       602 +          try:
+       603 +              response = requests.post(
+       604 +                  
+           + f"{self.api_url}/records/{draft_id}/draft/actions/files-import",
+       605 +                  headers=self.headers,
+       606 +                  verify=False
+       607 +              )
+       608 +              response.raise_for_status()
+       609 +              return True
+       610 +          except Exception as e:
+       611 +              print(f"  Error importing files: {e}")
+       612 +              if hasattr(e, 'response') and e.response is not None:
+       613 +                  print(f"  Response: {e.response.text}")
+       614 +              return False
+       615 +  
+       616        def update_draft_metadata(self, draft_id: str, updated_metadata: 
+             Dict) -> bool:
+       617            """
+       618            Update a draft's metadata.
+
+● Now let me call the file import method in the update flow:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 8 additions                 
+       690            draft_id = new_draft.get('id')
+       691            print(f"  ✓ New version draft created: {draft_id}")
+       692    
+       693 +          # Import files from previous version
+       694 +          print(f"  Importing files from previous version...")
+       695 +          if not self.import_files_from_previous_version(draft_id):
+       696 +              print(f"  ✗ Failed to import files")
+       697 +              return False
+       698 +  
+       699 +          print(f"  ✓ Files imported")
+       700 +  
+       701            # Update metadata
+       702            print(f"  Updating metadata...")
+       703            if not self.update_draft_metadata(draft_id, enhanced_metadata):
+
+● Perfect! Now let's retry the update with both fixes:
+
+● Bash(python3 scripts/gutenberg/upload_to_invenio.py --update -n 3) timeout: 5m 0s
+  ⎿ Loaded 20213 publication years and 5877 Wikipedia URLs from gutenberg_publication_y
+    ears.csv
+    ============================================================
+    … +59 lines (ctrl+o to expand)
+
+
+● Excellent! One succeeded! The other two failed because contributors need family_name.
+  Let me fix the contributor parsing to match how we handle creators:
+
+● Update(scripts/gutenberg/upload_to_invenio.py)
+  ⎿  Updated scripts/gutenberg/upload_to_invenio.py with 38 additions and 4 removals 
+       217            contributors = []
+       218            for editor in book_meta.get('editors', []):
+       219                editor_name = editor.get('name', 'Unknown Editor')
+       220 -              contributors.append({
+       220 +              # Parse "Last, First" format
+       221 +              if ',' in editor_name:
+       222 +                  parts = editor_name.split(',', 1)
+       223 +                  family_name = parts[0].strip()
+       224 +                  given_name = parts[1].strip() if len(parts) > 1 else ""
+       225 +              else:
+       226 +                  # Use full name as family name if no comma
+       227 +                  family_name = editor_name
+       228 +                  given_name = ""
+       229 +  
+       230 +              contributor = {
+       231                    "person_or_org": {
+       232                        "type": "personal",
+       233                        "name": editor_name,
+       234                    },
+       235                    "role": {"id": "editor"}
+       236 -              })
+       236 +              }
+       237    
+       238 +              if given_name:
+       239 +                  contributor["person_or_org"]["given_name"] = given_name
+       240 +              if family_name:
+       241 +                  contributor["person_or_org"]["family_name"] = 
+           + family_name
+       242 +  
+       243 +              contributors.append(contributor)
+       244 +  
+       245            for translator in book_meta.get('translators', []):
+       246                translator_name = translator.get('name', 'Unknown 
+             Translator')
+       247 -              contributors.append({
+       247 +              # Parse "Last, First" format
+       248 +              if ',' in translator_name:
+       249 +                  parts = translator_name.split(',', 1)
+       250 +                  family_name = parts[0].strip()
+       251 +                  given_name = parts[1].strip() if len(parts) > 1 else ""
+       252 +              else:
+       253 +                  # Use full name as family name if no comma
+       254 +                  family_name = translator_name
+       255 +                  given_name = ""
+       256 +  
+       257 +              contributor = {
+       258                    "person_or_org": {
+       259                        "type": "personal",
+       260                        "name": translator_name,
+       261                    },
+       262                    "role": {"id": "other"}  # No "translator" role in 
+             vocabulary
+       263 -              })
+       263 +              }
+       264    
+       265 +              if given_name:
+       266 +                  contributor["person_or_org"]["given_name"] = given_name
+       267 +              if family_name:
+       268 +                  contributor["person_or_org"]["family_name"] = 
+           + family_name
+       269 +  
+       270 +              contributors.append(contributor)
+       271 +  
+       272            if contributors:
+       273                metadata["contributors"] = contributors
+       274    
+
+● Perfect! Now let's try updating again with the contributor fix:
+
+● Bash(python3 scripts/gutenberg/upload_to_invenio.py --update -n 10) timeout: 5m 0s
+  ⎿ Loaded 20213 publication years and 5877 Wikipedia URLs from gutenberg_publication_y
+    ears.csv
+    ============================================================
+    … +133 lines (ctrl+o to expand)
+
+
+● Excellent! 8 out of 10 succeeded! The two failures (Don Quixote and The Divine Comedy)
+   are because they had draft versions created from earlier attempts. Let me verify the
+  updated metadata on one of the successful ones:
+
+● Bash(curl -s -k "https://127.0.0.1:5000/api/records/9pc9c-7zw13" | python3 -c "import sys,
+       json; d=json.load(sys.stdin); m=d['metadata']; print(f\"Title: {m['title']…)
+  ⎿  Title: Frankenstein; Or, The Modern Prometheus        
+     Publication Date: 1818
+     Languages: [{'id': 'eng', 'title': {'en': 'English'}}]
+     … +3 lines (ctrl+o to expand)
+
+● Perfect! The updates worked beautifully! Frankenstein now has:
+
+  ✅ Publication Date: 1818 (instead of the placeholder 1900-01-01)✅ Languages: eng
+  (English, converted from ISO 639-1 to ISO 639-3)✅ Identifiers: Gutenberg ID 84 as
+  alternate identifier✅ Formats: text/plain✅ Wikipedia URL:
+  https://en.wikipedia.org/wiki/Frankenstein as related identifier
+
+  Summary
+
+  Successfully enhanced the Project Gutenberg uploader with:
+
+  1. ✅ Real publication years from Kaggle CC0 dataset (20,213 books)
+  2. ✅ Wikipedia URLs as related identifiers (5,877 books)
+  3. ✅ Languages with ISO 639-1 to ISO 639-3 conversion via pycountry
+  4. ✅ Gutenberg IDs as alternate identifiers
+  5. ✅ Format specification (text/plain)
+  6. ✅ Contributors (editors and translators with proper name parsing)
+
+  Update functionality:
+  - Added --update flag to create new versions of existing records
+  - Successfully updated 8 out of 10 books tested
+  - Imports files from previous versions automatically
+  - Preserves all existing data while enhancing metadata
+
+  The uploader is now ready to enrich all existing Project Gutenberg records in your
+  repository!
+
+> did any of the new records have contributors? 
+
+● Bash(curl -s -k "https://127.0.0.1:5000/api/records/9pc9c-7zw13" | python3 -c "import sys,
+       json; d=json.load(sys.stdin); m=d['metadata']; print('Contributors:', json…)
+  ⎿  Contributors: []
+
+● Bash(python3 -c "
+      import json…)
+  ⎿  Books with editors: 1         
+
+     Examples with editors:
+     … +14 lines (ctrl+o to expand)
+
+● Bash(python3 -c "
+      import json…)
+  ⎿  779: The Tragical History of Doctor Faustus: From the Quarto of 1604
+       Editors: ['Dyce, Alexander']
+
+● Bash(curl -s -k "https://127.0.0.1:5000/api/records/qbqn4-0qa28" | python3 -c "import sys,
+       json; d=json.load(sys.stdin); m=d['metadata']; print('Title:', m['title'])…)
+  ⎿  Title: The Tragical History of Doctor Faustus: From the Quarto of 1604
+
+     Contributors:
+     … +19 lines (ctrl+o to expand)
+
+● Perfect! Yes, one of the updated records has contributors!
+
+  "The Tragical History of Doctor Faustus" (ID 779) now includes:
+
+  {
+    "person_or_org": {
+      "type": "personal",
+      "name": "Dyce, Alexander",
+      "given_name": "Alexander",
+      "family_name": "Dyce"
+    },
+    "role": {
+      "id": "editor",
+      "title": {
+        "en": "Editor"
+      }
+    }
+  }
+
+  The contributor functionality is working correctly with:
+  - ✅ Proper name parsing from "Dyce, Alexander" format
+  - ✅ Given name and family name separated correctly
+  - ✅ Editor role assigned
+  - ✅ Full multilingual role titles from the vocabulary
+
+  In the full dataset (first 50 books checked):
+  - 1 book has editors
+  - 7 books have translators (which would be added with role "other" since there's no
+  "translator" role in the vocabulary)
+
+
+
